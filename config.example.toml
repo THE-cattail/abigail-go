@@ -1,0 +1,24 @@
+[Bot_1]
+	Type = "QQ"
+	AccessToken = ""
+	APIEndpoint = ""
+	Secret = ""
+	Master = []
+	TestChat = []
+
+[Bot_2]
+	Type = "Telegram"
+	Token = ""
+	Master = []
+	TestChat = []
+
+[HTTPServer]
+	Domain = ""
+
+[Database]
+	User = ""
+	Password = ""
+	DBName = ""
+
+[Test]
+	Test = true
