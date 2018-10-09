@@ -18,14 +18,18 @@ import (
 )
 
 var (
-	apiMaid   = &botmaid.BotMaid{}
-	rootDir   string
-	conf      *toml.Tree
-	db        *sql.DB
-	commands  = []botmaid.Command{}
+	botMaid = &botmaid.BotMaid{}
+	rootDir string
+	conf    *toml.Tree
+	db      *sql.DB
+
+	commands = []botmaid.Command{}
+	timers   = []botmaid.Timer{}
+
 	masters   = map[string][]string{}
 	testChats = map[string][]string{}
-	help      = botmaid.Help{
+
+	help = botmaid.Help{
 		SelfIntro: "我是阿比盖尔，他们都叫我塞勒姆的魔女呢，呵呵，可别把我惹急了。要叫出我的话，在命令前敲上“/”、“:”或者“：”就可以了。",
 		HelpMenu: `roll [r] - Roll点
 sc [sancheck] - SAN Check
@@ -66,7 +70,7 @@ gugugu --del [-d] <名称> - 删除一个团
 gugugu --list (--all [-a]) - 查看记录的团`,
 		},
 	}
-	loc *time.Location
+	loc, _ = time.LoadLocation("Asia/Shanghai")
 )
 
 func init() {
@@ -86,7 +90,6 @@ func main() {
 		http.ListenAndServe(":8570", nil)
 	}()
 
-	loc, err = time.LoadLocation("Asia/Shanghai")
 	if err != nil {
 		log.Fatalf("[Fatal] Load location: %v\n", err)
 	}
@@ -107,7 +110,7 @@ func main() {
 		log.Fatalf("[Fatal] Connect database: %v\n", err)
 	}
 
-	err = apiMaid.Init(conf)
+	err = botMaid.Init(conf)
 	if err != nil {
 		log.Fatalf("[Fatal] Read config: %v\n", err)
 	}
@@ -116,7 +119,7 @@ func main() {
 
 	sort.Sort(botmaid.CommandSlice(commands))
 
-	apiMaid.Run(conf, commands)
+	botMaid.Run(conf, commands, timers)
 }
 
 func send(e *api.Event, b *botmaid.Bot, hide bool) (int64, error) {
