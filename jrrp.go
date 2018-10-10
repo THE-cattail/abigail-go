@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	botmaid.AddTimer(&timers, jrrp, time.Date(2018, 10, 9, 0, 0, 0, 0, loc), "daily")
+	botmaid.AddTimer(&timers, jrrp, time.Date(2018, 10, 9, 0, 0, 5, 0, loc), "daily")
 }
 
 func jrrp() {

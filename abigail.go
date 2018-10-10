@@ -119,7 +119,7 @@ func main() {
 
 	sort.Sort(botmaid.CommandSlice(commands))
 
-	botMaid.Run(conf, commands, timers)
+	botMaid.Run(conf, commands, timers, time.Now())
 }
 
 func send(e *api.Event, b *botmaid.Bot, hide bool) (int64, error) {
