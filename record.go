@@ -112,7 +112,7 @@ func recordView(e *api.Event, b *botmaid.Bot) bool {
 
 func recordDelete(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "record", "rec") && len(args) > 2 && slices.In(args[1], "--del", "-d") {
+	if b.IsCommand(e, "record", "rec") && len(args) > 2 && slices.In(args[1], "-del", "-d") {
 		theRecord := dbAbiRecord{}
 		err := db.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
 		if err != nil {
@@ -128,7 +128,7 @@ func recordDelete(e *api.Event, b *botmaid.Bot) bool {
 		if err != nil {
 			return true
 		}
-		if len(args) > 3 && args[3] == "--id" {
+		if len(args) > 3 && args[3] == "-id" {
 			stmt, err = db.Prepare("DELETE FROM abi_record WHERE chat_id = $1 AND id = $2")
 			if err != nil {
 				return true
@@ -148,7 +148,7 @@ func recordDelete(e *api.Event, b *botmaid.Bot) bool {
 
 func recordList(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "record", "rec") && len(args) > 1 && slices.In(args[1], "--list", "-l") {
+	if b.IsCommand(e, "record", "rec") && len(args) > 1 && slices.In(args[1], "-list", "-l") {
 		rows, err := db.Query("SELECT * FROM abi_record WHERE chat_id = $1", e.Place.ID)
 		if err != nil {
 			return true
@@ -161,7 +161,7 @@ func recordList(e *api.Event, b *botmaid.Bot) bool {
 			if err != nil {
 				return true
 			}
-			if len(args) > 2 && args[2] == "--id" {
+			if len(args) > 2 && args[2] == "-id" {
 				list = append(list, theRecord.Name+"["+strconv.FormatInt(theRecord.ID, 10)+"]")
 			} else {
 				list = append(list, theRecord.Name)

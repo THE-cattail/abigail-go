@@ -73,7 +73,7 @@ func call(e *api.Event, b *botmaid.Bot) bool {
 
 func callGugugu(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "call") && len(args) > 2 && slices.In(args[1], "--gugugu") {
+	if b.IsCommand(e, "call") && len(args) > 2 && slices.In(args[1], "-gugugu") {
 		theGugugu := dbAbiGugugu{}
 		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil || theGugugu.At == "" {
@@ -95,7 +95,7 @@ func callGugugu(e *api.Event, b *botmaid.Bot) bool {
 
 func callStatus(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "call") && len(args) > 1 && slices.In(args[1], "--status", "-s") {
+	if b.IsCommand(e, "call") && len(args) > 1 && slices.In(args[1], "-status", "-s") {
 		if _, ok := callMap[e.Place.ID]; !ok || !callMap[e.Place.ID].Status {
 			send(&api.Event{
 				Message: &api.Message{

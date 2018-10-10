@@ -306,7 +306,7 @@ func rollCharacter(e *api.Event, b *botmaid.Bot) bool {
 		message += "智力" + strconv.Itoa(c.INT) + " "
 		message += "幸运" + strconv.Itoa(c.Luck)
 		args := botmaid.SplitCommand(e.Message.Text)
-		if len(args) > 1 && slices.In(args[1], "--full", "-f") {
+		if len(args) > 1 && slices.In(args[1], "-full", "-f") {
 			message += "\n"
 			//message += random.String(wordRollDescription) + c.Description + "\n"
 			message += random.String(wordRollThought) + c.Thought + "\n"
@@ -424,10 +424,10 @@ func ww(e *api.Event, b *botmaid.Bot) bool {
 
 func initRoll(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "roll", "r", "ww") && len(args) > 1 && slices.In(args[1], "--hide", "-h") {
+	if b.IsCommand(e, "roll", "r", "ww") && len(args) > 1 && slices.In(args[1], "-hide", "-h") {
 		hide[e.ID] = true
 		e.Message.Text = strings.Replace(e.Message.Text, "-h", "", 1)
-		e.Message.Text = strings.Replace(e.Message.Text, "--hide", "", 1)
+		e.Message.Text = strings.Replace(e.Message.Text, "-hide", "", 1)
 	}
 	return false
 }

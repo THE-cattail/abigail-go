@@ -65,7 +65,7 @@ func gugugu(e *api.Event, b *botmaid.Bot) bool {
 	if b.IsCommand(e, "gugugu") && len(args) > 1 {
 		members := ""
 		at := ""
-		if len(args) > 2 && args[2] == "--at" {
+		if len(args) > 2 && args[2] == "-at" {
 			for i := 3; i+1 < len(args); i += 2 {
 				if members != "" {
 					members += "、"
@@ -115,7 +115,7 @@ func gugugu(e *api.Event, b *botmaid.Bot) bool {
 
 func guguguComplete(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "gugugu") && len(args) > 2 && slices.In(args[1], "--complete", "-c") {
+	if b.IsCommand(e, "gugugu") && len(args) > 2 && slices.In(args[1], "-complete", "-c") {
 		theGugugu := dbAbiGugugu{}
 		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil || theGugugu.Status == 1 {
@@ -139,7 +139,7 @@ func guguguComplete(e *api.Event, b *botmaid.Bot) bool {
 
 func guguguDelete(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "gugugu") && len(args) > 2 && slices.In(args[1], "--del", "-d") {
+	if b.IsCommand(e, "gugugu") && len(args) > 2 && slices.In(args[1], "-del", "-d") {
 		theGugugu := dbAbiGugugu{}
 		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil {
@@ -163,12 +163,12 @@ func guguguDelete(e *api.Event, b *botmaid.Bot) bool {
 
 func guguguList(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "gugugu") && len(args) > 1 && slices.In(args[1], "--list", "-l") {
+	if b.IsCommand(e, "gugugu") && len(args) > 1 && slices.In(args[1], "-list", "-l") {
 		rows, err := db.Query("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND status = $2", e.Place.ID, 0)
 		if err != nil {
 			return true
 		}
-		if len(args) > 2 && slices.In(args[2], "--all", "-a") {
+		if len(args) > 2 && slices.In(args[2], "-all", "-a") {
 			rows, err = db.Query("SELECT * FROM abi_gugugu WHERE chat_id = $1", e.Place.ID)
 			if err != nil {
 				return true
