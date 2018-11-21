@@ -8,7 +8,7 @@ import (
 	"github.com/catsworld/api"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/coc"
-	"github.com/catsworld/expression"
+	"github.com/catsworld/nyamath/expression"
 	"github.com/catsworld/random"
 	"github.com/catsworld/slices"
 )
@@ -84,7 +84,7 @@ var (
 		"大失败 Q皿Q",
 	}
 
-	wordCheckEgg = []botmaid.Word{
+	wordCheckEgg = botmaid.WordSlice{
 		botmaid.Word{
 			Word:   "",
 			Weight: 19,
@@ -99,14 +99,50 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, rollMad, 5)
-	botmaid.AddCommand(&commands, rollCharacter, 5)
-	botmaid.AddCommand(&commands, initRoll, 5)
-	botmaid.AddCommand(&commands, rollXdy, 5)
-	botmaid.AddCommand(&commands, rollCalc, 5)
-	botmaid.AddCommand(&commands, roll, 5)
-	botmaid.AddCommand(&commands, rollList, 5)
-	botmaid.AddCommand(&commands, ww, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       rollMad,
+		Priority: 5,
+		Menu:     "roll",
+		Names:    []string{"mad"},
+		Help:     " - roll一次临时疯狂症状",
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       rollCharacter,
+		Priority: 5,
+		Menu:     "roll",
+		Names:    []string{"char", "character"},
+		Help:     " [/char] (-full [-f]) - roll一张人物卡",
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       initRoll,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       rollXdy,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       rollCalc,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       roll,
+		Priority: 5,
+		Menu:     "roll",
+		Names:    []string{"roll"},
+		Help: ` <说明（可省略）> <表达式> - 进行一次表达式计算/检定
+		roll <说明（可省略）> <数值（可省略）> - 进行一次d100的检定
+		roll <列表> - roll列表
+		roll -hide [-h] <命令> - 暗投`,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       rollList,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       ww,
+		Priority: 5,
+	})
 }
 
 func roll(e *api.Event, b *botmaid.Bot) bool {
@@ -153,9 +189,9 @@ func roll(e *api.Event, b *botmaid.Bot) bool {
 	}
 	message = fmt.Sprintf(random.String(formatRoll), e.Sender.NickName, instruction+"检定结果", message)
 	if result.Success() {
-		message += botmaid.RandomWordWithWeight(wordCheckEgg)
+		message += wordCheckEgg.Random()
 	}
-	send(&api.Event{
+	send(api.Event{
 		Message: &api.Message{
 			Text: message,
 		},
@@ -225,7 +261,7 @@ func rollXdy(e *api.Event, b *botmaid.Bot) bool {
 		}
 		result += ") = " + strconv.FormatInt(sum, 10)
 	}
-	send(&api.Event{
+	send(api.Event{
 		Message: &api.Message{
 			Text: fmt.Sprintf(random.String(formatRoll), e.Sender.NickName, instruction+"检定结果", result),
 		},
@@ -256,7 +292,7 @@ func rollCalc(e *api.Event, b *botmaid.Bot) bool {
 	if err != nil {
 		return false
 	}
-	send(&api.Event{
+	send(api.Event{
 		Message: &api.Message{
 			Text: fmt.Sprintf(random.String(formatRoll), e.Sender.NickName, instruction, ee.Result()),
 		},
@@ -268,7 +304,7 @@ func rollCalc(e *api.Event, b *botmaid.Bot) bool {
 func rollList(e *api.Event, b *botmaid.Bot) bool {
 	if b.IsCommand(e, "roll", "r") {
 		args := botmaid.SplitCommand(e.Message.Text)
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatRoll), e.Sender.NickName, "随机结果", args[random.Rand(1, int64(len(args)-1))]),
 			},
@@ -281,7 +317,7 @@ func rollList(e *api.Event, b *botmaid.Bot) bool {
 
 func rollMad(e *api.Event, b *botmaid.Bot) bool {
 	if b.IsCommand(e, "mad") {
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatRollMad), e.Sender.NickName) + coc.RollMad(),
 			},
@@ -315,7 +351,7 @@ func rollCharacter(e *api.Event, b *botmaid.Bot) bool {
 			message += random.String(wordRollTreasure) + c.Treasure + "\n"
 			message += random.String(wordRollFeature) + c.Feature
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatRollCharacter), e.Sender.NickName) + message,
 			},
@@ -411,7 +447,7 @@ func ww(e *api.Event, b *botmaid.Bot) bool {
 			message += " + " + strconv.Itoa(plus) + " = " + strconv.Itoa(ans) + " + " + strconv.Itoa(plus)
 		}
 		message += " = " + strconv.Itoa(ans+plus)
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatRoll), e.Sender.NickName, instruction+"检定结果", message),
 			},

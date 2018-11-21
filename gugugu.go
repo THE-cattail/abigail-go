@@ -39,14 +39,32 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, guguguList, 5)
-	botmaid.AddCommand(&commands, guguguComplete, 5)
-	botmaid.AddCommand(&commands, guguguDelete, 5)
-	botmaid.AddCommand(&commands, gugugu, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       guguguList,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       guguguComplete,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       guguguDelete,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       gugugu,
+		Priority: 5,
+		Menu:     "gugugu",
+		Names:    []string{"gugugu"},
+		Help: ` <名称> <成员> - 记录一个新团
+		gugugu -complete [-c] <名称> - 结一个团
+		gugugu -del [-d] <名称> - 删除一个团
+		gugugu -list (-all [-a]) - 查看记录的团`,
+	})
 }
 
 func guguguInit() {
-	stmt, err := db.Prepare(`CREATE TABLE abi_gugugu (
+	stmt, err := bm.DB.Prepare(`CREATE TABLE abi_gugugu (
 		id SERIAL primary key,
 		chat_id bigint not null,
 		name text,
@@ -86,23 +104,23 @@ func gugugu(e *api.Event, b *botmaid.Bot) bool {
 		}
 		log.Println(members, at)
 		theGugugu := dbAbiGugugu{}
-		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[1]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
+		err := bm.DB.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[1]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil {
-			stmt, err := db.Prepare("INSERT INTO abi_gugugu(chat_id, name, members, at, status) VALUES($1, $2, $3, $4, $5)")
+			stmt, err := bm.DB.Prepare("INSERT INTO abi_gugugu(chat_id, name, members, at, status) VALUES($1, $2, $3, $4, $5)")
 			if err != nil {
 				log.Println(err)
 				return true
 			}
 			stmt.Exec(e.Place.ID, args[1], members, at, 0)
 		} else {
-			stmt, err := db.Prepare("UPDATE abi_gugugu SET members = $1, at = $2, status = $3 WHERE id = $4")
+			stmt, err := bm.DB.Prepare("UPDATE abi_gugugu SET members = $1, at = $2, status = $3 WHERE id = $4")
 			if err != nil {
 				log.Println(err)
 				return true
 			}
 			stmt.Exec(members, at, 0, theGugugu.ID)
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatGugugu), args[1]),
 			},
@@ -117,16 +135,16 @@ func guguguComplete(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "gugugu") && len(args) > 2 && slices.In(args[1], "-complete", "-c") {
 		theGugugu := dbAbiGugugu{}
-		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
+		err := bm.DB.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil || theGugugu.Status == 1 {
 			return true
 		}
-		stmt, err := db.Prepare("UPDATE abi_gugugu SET status = $1 WHERE id = $2")
+		stmt, err := bm.DB.Prepare("UPDATE abi_gugugu SET status = $1 WHERE id = $2")
 		if err != nil {
 			return true
 		}
 		stmt.Exec(1, theGugugu.ID)
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatGuguguComplete), args[2]),
 			},
@@ -141,16 +159,16 @@ func guguguDelete(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "gugugu") && len(args) > 2 && slices.In(args[1], "-del", "-d") {
 		theGugugu := dbAbiGugugu{}
-		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
+		err := bm.DB.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil {
 			return true
 		}
-		stmt, err := db.Prepare("DELETE FROM abi_gugugu WHERE id = $1")
+		stmt, err := bm.DB.Prepare("DELETE FROM abi_gugugu WHERE id = $1")
 		if err != nil {
 			return true
 		}
 		stmt.Exec(theGugugu.ID)
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatGuguguDelete), args[2]),
 			},
@@ -164,12 +182,12 @@ func guguguDelete(e *api.Event, b *botmaid.Bot) bool {
 func guguguList(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "gugugu") && len(args) > 1 && slices.In(args[1], "-list", "-l") {
-		rows, err := db.Query("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND status = $2", e.Place.ID, 0)
+		rows, err := bm.DB.Query("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND status = $2", e.Place.ID, 0)
 		if err != nil {
 			return true
 		}
 		if len(args) > 2 && slices.In(args[2], "-all", "-a") {
-			rows, err = db.Query("SELECT * FROM abi_gugugu WHERE chat_id = $1", e.Place.ID)
+			rows, err = bm.DB.Query("SELECT * FROM abi_gugugu WHERE chat_id = $1", e.Place.ID)
 			if err != nil {
 				return true
 			}
@@ -191,7 +209,7 @@ func guguguList(e *api.Event, b *botmaid.Bot) bool {
 			list = append(list, text)
 		}
 		if len(list) == 0 {
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: random.String(wordGuguguListEmpty),
 				},
@@ -203,7 +221,7 @@ func guguguList(e *api.Event, b *botmaid.Bot) bool {
 		for _, v := range list {
 			message += "\n" + v
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: message,
 			},

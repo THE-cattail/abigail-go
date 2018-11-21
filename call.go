@@ -40,11 +40,32 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, gule, 10)
-	botmaid.AddCommand(&commands, callResp, 10)
-	botmaid.AddCommand(&commands, callStatus, 5)
-	botmaid.AddCommand(&commands, callGugugu, 5)
-	botmaid.AddCommand(&commands, call, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       gule,
+		Priority: 10,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       callResp,
+		Priority: 10,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       callStatus,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       callGugugu,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       call,
+		Priority: 5,
+		Menu:     "call",
+		Names:    []string{"call"},
+		Help: ` <@其他人> - 进行一次点名
+		call -status [-s] - 查看当前点名情况
+		call -gugugu <名称> - 用记录的成员点名
+		咕咕咕 - 溜了溜了`,
+	})
 }
 
 func call(e *api.Event, b *botmaid.Bot) bool {
@@ -60,7 +81,7 @@ func call(e *api.Event, b *botmaid.Bot) bool {
 		for i := 1; i < len(args); i++ {
 			callMap[e.Place.ID].List[args[i]] = true
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordCallStart),
 			},
@@ -75,14 +96,14 @@ func callGugugu(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "call") && len(args) > 2 && slices.In(args[1], "-gugugu") {
 		theGugugu := dbAbiGugugu{}
-		err := db.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
+		err := bm.DB.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
 		if err != nil || theGugugu.At == "" {
 			return true
 		}
 		ee := e
 		ee.Message.Text = "/call " + theGugugu.At
 		call(ee, b)
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: theGugugu.At,
 			},
@@ -97,7 +118,7 @@ func callStatus(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "call") && len(args) > 1 && slices.In(args[1], "-status", "-s") {
 		if _, ok := callMap[e.Place.ID]; !ok || !callMap[e.Place.ID].Status {
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: random.String(wordCallNotStart),
 				},
@@ -106,7 +127,7 @@ func callStatus(e *api.Event, b *botmaid.Bot) bool {
 			return true
 		}
 		if callMap[e.Place.ID].Get == 0 {
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: random.String(wordCallNobody),
 				},
@@ -120,7 +141,7 @@ func callStatus(e *api.Event, b *botmaid.Bot) bool {
 				message += key + " "
 			}
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: message[:len(message)-1],
 			},
@@ -133,10 +154,10 @@ func callStatus(e *api.Event, b *botmaid.Bot) bool {
 
 func gule(e *api.Event, b *botmaid.Bot) bool {
 	if b.IsCommand(e, "咕咕", "咕了") {
-		if _, ok := callMap[e.Place.ID]; ok && callMap[e.Place.ID].Status && callMap[e.Place.ID].List[b.At(e.Sender)] {
+		if _, ok := callMap[e.Place.ID]; ok && callMap[e.Place.ID].Status && callMap[e.Place.ID].List[b.At(e.Sender)[0]] {
 			callMap[e.Place.ID].Status = false
 			callMap[e.Place.ID].List = make(map[string]bool)
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: fmt.Sprintf(random.String(formatGule), e.Sender.NickName),
 				},
@@ -152,13 +173,13 @@ func callResp(e *api.Event, b *botmaid.Bot) bool {
 	if _, ok := callMap[e.Place.ID]; !ok || !callMap[e.Place.ID].Status {
 		return false
 	}
-	if callMap[e.Place.ID].List[b.At(e.Sender)] && !callMap[e.Place.ID].Resped[b.At(e.Sender)] {
-		callMap[e.Place.ID].Resped[b.At(e.Sender)] = true
+	if callMap[e.Place.ID].List[b.At(e.Sender)[0]] && !callMap[e.Place.ID].Resped[b.At(e.Sender)[0]] {
+		callMap[e.Place.ID].Resped[b.At(e.Sender)[0]] = true
 		callMap[e.Place.ID].Get++
 	}
 	if callMap[e.Place.ID].Get == callMap[e.Place.ID].Total {
 		callMap[e.Place.ID].Status = false
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordCallComplete),
 			},

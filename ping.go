@@ -29,12 +29,15 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, ping, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       ping,
+		Priority: 5,
+	})
 }
 
 func ping(e *api.Event, b *botmaid.Bot) bool {
 	if b.IsCommand(e, "ping") {
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordPing),
 			},

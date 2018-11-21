@@ -26,12 +26,38 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, save, 10)
-	botmaid.AddCommand(&commands, trpgRecord, 10)
-	botmaid.AddCommand(&commands, trpg, 5)
-	botmaid.AddCommand(&commands, load, 5)
-	botmaid.AddCommand(&commands, join, 5)
-	botmaid.AddCommand(&commands, review, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       save,
+		Priority: 10,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       trpgRecord,
+		Priority: 10,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       trpg,
+		Priority: 5,
+		Menu:     "trpg",
+		Names:    []string{"trpg"},
+		Help: ` <名称> - 新建一个团或者覆盖之前同名团的存档
+		load <名称> - 载入之前团的存档
+		save - 存档
+		join - 加入当前团
+		join <昵称> - 加入当前团并设置昵称
+		review <名称> - 显示之前存档的内容`,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       load,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       join,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       review,
+		Priority: 5,
+	})
 }
 
 func trpgRecord(e *api.Event, b *botmaid.Bot) bool {
@@ -58,7 +84,7 @@ func startTRPG(e *api.Event, b *botmaid.Bot, name string) {
 	trpgRecordFileName[e.Place.ID] = "TRPGLog/" + strconv.FormatInt(int64(e.Place.ID), 10) + "_" + name + ".md"
 	trpgRecordAgree[e.Place.ID] = map[int64]bool{}
 	trpgRecordNickName[e.Place.ID] = map[int64]string{}
-	b.API.Push(&api.Event{
+	b.API.Push(api.Event{
 		Message: &api.Message{
 			Text: fmt.Sprintf(random.String(formatTRPGStart), name),
 		},
@@ -114,7 +140,7 @@ func join(e *api.Event, b *botmaid.Bot) bool {
 func save(e *api.Event, b *botmaid.Bot) bool {
 	if b.IsCommand(e, "save") && trpgRecordFileName[e.Place.ID] != "" {
 		trpgRecordFileName[e.Place.ID] = ""
-		b.API.Push(&api.Event{
+		b.API.Push(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordTRPGSave),
 			},
@@ -133,9 +159,9 @@ func review(e *api.Event, b *botmaid.Bot) bool {
 		bs := h.Sum(nil)
 		cmd := exec.Command("pandoc", rootDir+"/TRPGLog/"+strconv.FormatInt(int64(e.Place.ID), 10)+"_"+args[1]+".md", "-o", rootDir+"/http/TRPGLog/"+fmt.Sprintf("%x", bs)+".html")
 		cmd.Run()
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
-				Text: conf.Get("HTTPServer.Domain").(string) + "TRPGLog/" + fmt.Sprintf("%x", bs) + ".html",
+				Text: bm.Conf.Get("HTTPServer.Domain").(string) + "TRPGLog/" + fmt.Sprintf("%x", bs) + ".html",
 			},
 			Place: e.Place,
 		}, b, false)

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"time"
 
 	"github.com/catsworld/api"
@@ -18,72 +17,60 @@ import (
 )
 
 var (
-	botMaid = &botmaid.BotMaid{}
 	rootDir string
-	conf    *toml.Tree
-	db      *sql.DB
 
-	commands = []botmaid.Command{}
-	timers   = []botmaid.Timer{}
-
-	masters   = map[string][]string{}
-	testChats = map[string][]string{}
-
-	help = botmaid.Help{
-		SelfIntro: []string{
-			"我是阿比盖尔，他们都叫我塞勒姆的魔女呢，呵呵，可别把我惹急了。%s，要叫出我的话，在命令前敲上“/”、“:”或者“：”就可以了。",
+	bm = botmaid.BotMaid{
+		Bots: map[string]*botmaid.Bot{},
+		HelpMenus: map[string]string{
+			"roll":    "Roll点",
+			"sc":      "SAN Check",
+			"call":    "点名",
+			"record":  "记录",
+			"pk":      "对抗",
+			"cocwiki": "CoC 百科",
+			"trpg":    "开一个新团并记录跑团过程",
+			"gugugu":  "记录已跑过的团",
 		},
-		HelpMenu: `roll [r] - Roll点
-sc [sancheck] - SAN Check
-call - 点名
-record [rec] - 记录
-pk - 对抗
-cocwiki - CoC 百科
-trpg - 开一个新团并记录跑团过程
-gugugu - 记录已跑过的团`,
-		UndefCommand: []string{
-			"%s？那是什么啊，乖孩子是不知道的哦。",
+		Words: map[string][]string{
+			"selfIntro": []string{
+				"我是阿比盖尔，他们都叫我塞勒姆的魔女呢，呵呵，可别把我惹急了。%s，要叫出我的话，在命令前敲上“/”、“:”或者“：”就可以了。",
+			},
+			"undefCommand": []string{
+				"%s？那是什么啊，乖孩子是不知道的呢。",
+			},
+			"invalidMaster": []string{
+				"要用 At 和我说哦，不然我也没法知道%s的用户名呢。",
+			},
+			"masterExisted": []string{
+				"%s已经是我的御主了。",
+			},
+			"masterAdded": []string{
+				"%s，你好！我是阿比盖尔——阿比盖尔·威廉姆斯，我是Fo……reigner……你就是御主吗？如果你不介意的话，希望你能叫我阿比。我想我们很快就能成为朋友。",
+			},
+			"masterNotExisted": []string{
+				"%s不是我的御主呢。",
+			},
+			"masterRemoved": []string{
+				"以后%s就不是我的御主了哦。",
+			},
+			"testPlaceAdded": []string{
+				"以后可以在这里练习吗？呵呵，感觉好像挺不错的。",
+			},
+			"testPlaceRemoved": []string{
+				"不能在这里练习了吗……",
+			},
 		},
-		HelpSubMenu: map[string]string{
-			"roll": `roll <说明（可省略）> <表达式> - 进行一次表达式计算/检定
-roll <说明（可省略）> <数值（可省略）> - 进行一次d100的检定
-roll <列表> - roll列表。
-roll -hide [-h] <命令> - 暗投
-tempmad - roll一次临时疯狂症状
-character [/char] (-full [-f]) - roll一张人物卡`,
-			"sc": "sc <SANCheck公式> - 进行一次SAN Check",
-			"call": `call <@其他人> - 进行一次点名
-call -status [-s] - 查看当前点名情况
-call -gugugu <名称> - 用记录的成员点名
-咕咕咕 - 溜了溜了`,
-			"record": `record <名称> <内容> - 进行记录
-record <名称> - 查看记录的内容
-record -del [-d] <名称> - 删除记录
-record -list [-l] - 列出全部记录`,
-			"pk":      "pk - 进行一次对抗",
-			"cocwiki": "cocwiki <词条> - 在 CoC 百科中查询资料",
-			"trpg": `trpg <名称> - 新建一个团或者覆盖之前同名团的存档
-load <名称> - 载入之前团的存档
-save - 存档
-join - 加入当前团
-join <昵称> - 加入当前团并设置昵称
-review <名称> - 显示之前存档的内容`,
-			"gugugu": `gugugu <名称> <成员> - 记录一个新团
-gugugu -complete [-c] <名称> - 结一个团
-gugugu -del [-d] <名称> - 删除一个团
-gugugu -list (-all [-a]) - 查看记录的团`,
-		},
-		HelpAlias: map[string]string{
-			"sancheck": "sc",
-			"rec":      "record",
-			"r":        "roll",
-		},
+		RespTime: time.Now(),
 	}
+
 	loc, _ = time.LoadLocation("Asia/Shanghai")
 )
 
 func init() {
-	botmaid.AddCommand(&commands, trpgInit, 200)
+	bm.AddCommand(botmaid.Command{
+		Do:       trpgInit,
+		Priority: 200,
+	})
 }
 
 func main() {
@@ -99,39 +86,32 @@ func main() {
 		http.ListenAndServe(":8570", nil)
 	}()
 
-	if err != nil {
-		log.Fatalf("[Fatal] Load location: %v\n", err)
-	}
-
 	raw, err := ioutil.ReadFile(rootDir + "/config.toml")
 	if err != nil {
 		log.Fatalf("[Fatal] Read config: %v\n", err)
 	}
-	conf, err = toml.Load(string(raw))
+	bm.Conf, err = toml.Load(string(raw))
 	if err != nil {
 		log.Fatalf("[Fatal] Read config: %v\n", err)
 	}
 
-	botmaid.RegHelpCommand(&commands, &help)
-
-	db, err = sql.Open("postgres", "user="+conf.Get("Database.User").(string)+" password="+conf.Get("Database.Password").(string)+" dbname="+conf.Get("Database.DBName").(string)+" sslmode=disable")
+	bm.DB, err = sql.Open("postgres", "user="+bm.Conf.Get("Database.User").(string)+" password="+bm.Conf.Get("Database.Password").(string)+" dbname="+bm.Conf.Get("Database.DBName").(string)+" sslmode=disable")
 	if err != nil {
 		log.Fatalf("[Fatal] Connect database: %v\n", err)
 	}
 
-	err = botMaid.Init(conf)
+	err = bm.InitBroadcastTable("jrrp")
+	if err != nil {
+		log.Fatalf("[Fatal] Init jrrp: %v\n", err)
+	}
+
+	err = bm.Start()
 	if err != nil {
 		log.Fatalf("[Fatal] Read config: %v\n", err)
 	}
-
-	log.Println("加载完成！")
-
-	sort.Sort(botmaid.CommandSlice(commands))
-
-	botMaid.Run(conf, commands, timers, time.Now())
 }
 
-func send(e *api.Event, b *botmaid.Bot, hide bool) (int64, error) {
+func send(e api.Event, b *botmaid.Bot, hide bool) (api.Event, error) {
 	e.Sender = &api.User{
 		ID:       b.Self.ID,
 		NickName: b.Self.NickName,
@@ -141,7 +121,7 @@ func send(e *api.Event, b *botmaid.Bot, hide bool) (int64, error) {
 	}
 	if _, ok := trpgRecordAgree[e.Place.ID]; ok {
 		if _, ok := trpgRecordAgree[e.Place.ID][e.Sender.ID]; ok && trpgRecordAgree[e.Place.ID][e.Sender.ID] {
-			trpgRecord(e, b)
+			trpgRecord(&e, b)
 		}
 	}
 	if hide {
@@ -150,5 +130,6 @@ func send(e *api.Event, b *botmaid.Bot, hide bool) (int64, error) {
 			Type: "private",
 		}
 	}
+	log.Println(e)
 	return b.API.Push(e)
 }

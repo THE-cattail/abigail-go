@@ -37,14 +37,32 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, recordView, 5)
-	botmaid.AddCommand(&commands, recordDelete, 5)
-	botmaid.AddCommand(&commands, recordList, 5)
-	botmaid.AddCommand(&commands, record, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       recordView,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       recordDelete,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       recordList,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       record,
+		Priority: 5,
+		Menu:     "record",
+		Names:    []string{"record", "rec"},
+		Help: ` <名称> <内容> - 进行记录
+		record <名称> - 查看记录的内容
+		record -del [-d] <名称> - 删除记录
+		record -list [-l] - 列出全部记录`,
+	})
 }
 
 func recordInit() {
-	stmt, err := db.Prepare(`CREATE TABLE abi_record (
+	stmt, err := bm.DB.Prepare(`CREATE TABLE abi_record (
 		id SERIAL primary key,
 		chat_id bigint not null,
 		name text,
@@ -60,21 +78,21 @@ func record(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "record", "rec") && len(args) > 2 {
 		theRecord := dbAbiRecord{}
-		err := db.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[1]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
+		err := bm.DB.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[1]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
 		if err != nil {
-			stmt, err := db.Prepare("INSERT INTO abi_record(chat_id, name, content) VALUES($1, $2, $3)")
+			stmt, err := bm.DB.Prepare("INSERT INTO abi_record(chat_id, name, content) VALUES($1, $2, $3)")
 			if err != nil {
 				return true
 			}
 			stmt.Exec(e.Place.ID, args[1], args[2])
 		} else {
-			stmt, err := db.Prepare("UPDATE abi_record SET content = $1 WHERE id = $2")
+			stmt, err := bm.DB.Prepare("UPDATE abi_record SET content = $1 WHERE id = $2")
 			if err != nil {
 				return true
 			}
 			stmt.Exec(args[2], theRecord.ID)
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatRecordAdded), args[1]),
 			},
@@ -89,9 +107,9 @@ func recordView(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "record", "rec") && len(args) == 2 {
 		theRecord := dbAbiRecord{}
-		err := db.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[1]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
+		err := bm.DB.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[1]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
 		if err != nil {
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: fmt.Sprintf(random.String(formatRecordViewErr), args[1]),
 				},
@@ -99,7 +117,7 @@ func recordView(e *api.Event, b *botmaid.Bot) bool {
 			}, b, false)
 			return true
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: args[1] + "：\n" + theRecord.Content,
 			},
@@ -114,9 +132,9 @@ func recordDelete(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "record", "rec") && len(args) > 2 && slices.In(args[1], "-del", "-d") {
 		theRecord := dbAbiRecord{}
-		err := db.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
+		err := bm.DB.QueryRow("SELECT * FROM abi_record WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theRecord.ID, &theRecord.PlaceID, &theRecord.Name, &theRecord.Content)
 		if err != nil {
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: fmt.Sprintf(random.String(formatRecordViewErr), args[2]),
 				},
@@ -124,18 +142,18 @@ func recordDelete(e *api.Event, b *botmaid.Bot) bool {
 			}, b, false)
 			return true
 		}
-		stmt, err := db.Prepare("DELETE FROM abi_record WHERE chat_id = $1 AND name = $2")
+		stmt, err := bm.DB.Prepare("DELETE FROM abi_record WHERE chat_id = $1 AND name = $2")
 		if err != nil {
 			return true
 		}
 		if len(args) > 3 && args[3] == "-id" {
-			stmt, err = db.Prepare("DELETE FROM abi_record WHERE chat_id = $1 AND id = $2")
+			stmt, err = bm.DB.Prepare("DELETE FROM abi_record WHERE chat_id = $1 AND id = $2")
 			if err != nil {
 				return true
 			}
 		}
 		stmt.Exec(e.Place.ID, args[2])
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: fmt.Sprintf(random.String(formatRecordDeleted), args[2]),
 			},
@@ -149,7 +167,7 @@ func recordDelete(e *api.Event, b *botmaid.Bot) bool {
 func recordList(e *api.Event, b *botmaid.Bot) bool {
 	args := botmaid.SplitCommand(e.Message.Text)
 	if b.IsCommand(e, "record", "rec") && len(args) > 1 && slices.In(args[1], "-list", "-l") {
-		rows, err := db.Query("SELECT * FROM abi_record WHERE chat_id = $1", e.Place.ID)
+		rows, err := bm.DB.Query("SELECT * FROM abi_record WHERE chat_id = $1", e.Place.ID)
 		if err != nil {
 			return true
 		}
@@ -168,7 +186,7 @@ func recordList(e *api.Event, b *botmaid.Bot) bool {
 			}
 		}
 		if len(list) == 0 {
-			send(&api.Event{
+			send(api.Event{
 				Message: &api.Message{
 					Text: random.String(wordRecordListEmpty),
 				},
@@ -181,7 +199,7 @@ func recordList(e *api.Event, b *botmaid.Bot) bool {
 			message += list[i] + "、"
 		}
 		message += list[len(list)-1] + "。"
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: message,
 			},

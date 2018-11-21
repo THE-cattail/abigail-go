@@ -8,7 +8,7 @@ import (
 	"github.com/catsworld/api"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/coc"
-	"github.com/catsworld/expression"
+	"github.com/catsworld/nyamath/expression"
 	"github.com/catsworld/random"
 )
 
@@ -21,7 +21,7 @@ type scType struct {
 var (
 	scMap = make(map[int64]map[int64]*scType)
 
-	wordSCEgg = []botmaid.Word{
+	wordSCEgg = botmaid.WordSlice{
 		botmaid.Word{
 			Word:   "",
 			Weight: 99,
@@ -41,7 +41,13 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, sc, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       sc,
+		Priority: 5,
+		Menu:     "sc",
+		Names:    []string{"sc", "sancheck"},
+		Help:     " <SANCheck公式> - 进行一次SAN Check",
+	})
 }
 
 func sc(e *api.Event, b *botmaid.Bot) bool {
@@ -78,8 +84,8 @@ func sc(e *api.Event, b *botmaid.Bot) bool {
 		if err != nil {
 			return true
 		}
-		message := botmaid.RandomWordWithWeight(wordSCEgg) + fmt.Sprintf(random.String(formatSC), e.Sender.NickName)
-		send(&api.Event{
+		message := wordSCEgg.Random() + fmt.Sprintf(random.String(formatSC), e.Sender.NickName)
+		send(api.Event{
 			Message: &api.Message{
 				Text: message,
 			},
@@ -106,7 +112,7 @@ func scResp(e *api.Event, b *botmaid.Bot) {
 	scMap[e.Place.ID][e.Sender.ID] = &scType{
 		Status: false,
 	}
-	send(&api.Event{
+	send(api.Event{
 		Message: &api.Message{
 			Text: message,
 		},

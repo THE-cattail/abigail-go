@@ -3,14 +3,10 @@
 	AccessToken = ""
 	APIEndpoint = ""
 	Secret = ""
-	Master = []
-	TestChat = []
 
 [Bot_2]
 	Type = "Telegram"
 	Token = ""
-	Master = []
-	TestChat = []
 
 [HTTPServer]
 	Domain = ""

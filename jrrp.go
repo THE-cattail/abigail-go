@@ -8,31 +8,30 @@ import (
 )
 
 func init() {
-	botmaid.AddTimer(&timers, jrrp, time.Date(2018, 10, 9, 0, 0, 5, 0, loc), "daily")
+	bm.AddCommand(botmaid.Command{
+		Do:       switchJrrp,
+		Priority: 5,
+		Master:   true,
+	})
+	bm.AddTimer(botmaid.Timer{
+		Do:        jrrp,
+		Time:      time.Date(2018, 10, 9, 0, 0, 5, 0, loc),
+		Frequency: "daily",
+	})
+}
+
+func switchJrrp(e *api.Event, b *botmaid.Bot) bool {
+	args := botmaid.SplitCommand(e.Message.Text)
+	if b.IsCommand(e, "jrrp") && len(args) == 1 {
+		bm.SwitchBroadcast("jrrp", e.Place, b)
+		return true
+	}
+
+	return false
 }
 
 func jrrp() {
-	for _, v := range botMaid.Bots {
-		if v.Self.ID == 1261413197 {
-			v.API.Push(&api.Event{
-				Message: &api.Message{
-					Text: ".jrrp",
-				},
-				Place: &api.Place{
-					Type: "group",
-					ID:   738979059,
-				},
-			})
-			v.API.Push(&api.Event{
-				Message: &api.Message{
-					Text: ".jrrp",
-				},
-				Place: &api.Place{
-					Type: "group",
-					ID:   773745852,
-				},
-			})
-			return
-		}
-	}
+	bm.Broadcast("jrrp", &api.Message{
+		Text: ".jrrp",
+	})
 }

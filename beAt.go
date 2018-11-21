@@ -54,13 +54,19 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, masterAt, 5)
-	botmaid.AddCommand(&commands, beAt, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       masterAt,
+		Priority: 5,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do:       beAt,
+		Priority: 5,
+	})
 }
 
 func beAt(e *api.Event, b *botmaid.Bot) bool {
-	if b.CheckBeAt(e) {
-		send(&api.Event{
+	if b.BeAt(e) {
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordBeAt),
 			},
@@ -72,8 +78,8 @@ func beAt(e *api.Event, b *botmaid.Bot) bool {
 }
 
 func masterAt(e *api.Event, b *botmaid.Bot) bool {
-	if b.CheckBeAt(e) && b.IsMaster(e.Sender) {
-		send(&api.Event{
+	if b.BeAt(e) && b.IsMaster(*e.Sender) {
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordMasterAt),
 			},

@@ -36,7 +36,13 @@ var (
 )
 
 func init() {
-	botmaid.AddCommand(&commands, pk, 5)
+	bm.AddCommand(botmaid.Command{
+		Do:       pk,
+		Priority: 5,
+		Menu:     "pk",
+		Names:    []string{"pk"},
+		Help:     " - 进行一次对抗",
+	})
 }
 
 func pk(e *api.Event, b *botmaid.Bot) bool {
@@ -44,7 +50,7 @@ func pk(e *api.Event, b *botmaid.Bot) bool {
 		pkMap[e.Place.ID] = &pkType{
 			Status: true,
 		}
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordPKStart),
 			},
@@ -60,7 +66,7 @@ func pkResp(e *api.Event, b *botmaid.Bot) {
 		return
 	}
 	if len(pkMap[e.Place.ID].Results) == 1 {
-		send(&api.Event{
+		send(api.Event{
 			Message: &api.Message{
 				Text: random.String(wordPKNext),
 			},
@@ -82,7 +88,7 @@ func pkResp(e *api.Event, b *botmaid.Bot) {
 	pkMap[e.Place.ID] = &pkType{
 		Status: false,
 	}
-	send(&api.Event{
+	send(api.Event{
 		Message: &api.Message{
 			Text: message,
 		},
