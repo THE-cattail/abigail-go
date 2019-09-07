@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/catsworld/abigail/coc"
+	"github.com/catsworld/abigail/nyamath"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/nyamath"
 	"github.com/catsworld/random"
 )
 

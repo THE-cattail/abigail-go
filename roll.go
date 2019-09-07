@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/catsworld/abigail/coc"
+	"github.com/catsworld/abigail/nyamath"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/nyamath"
 	"github.com/catsworld/random"
 )
 
@@ -125,7 +125,7 @@ func init() {
 			return false
 		},
 		Names:      []string{"roll", "r", "ww"},
-		ArgsMinLen: 1,
+		ArgsMinLen: 2,
 		Help:       " hide - 进行一次暗骰",
 	})
 	bm.AddCommand(botmaid.Command{
