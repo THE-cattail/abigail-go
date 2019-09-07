@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/catsworld/api"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/random"
-	"github.com/catsworld/slices"
 )
 
 type callType struct {
@@ -18,173 +17,106 @@ type callType struct {
 }
 
 var (
-	callMap       = make(map[int64]*callType)
-	wordCallStart = []string{
-		"呵呵呵，看来调查员的召集开始了。",
-	}
-	wordCallNotStart = []string{
-		"好像有什么很热闹的样子呢……我也好想被叫去参加呢。",
-	}
-	wordCallNobody = []string{
-		"还没有谁在哦，果然大家都是鸽子吧（生气）。",
-	}
-	wordCallComplete = []string{
-		"调查员都已经聚集好了哦。呵呵，是不是又有什么事情要发生了。",
-	}
-	formatCallList = []string{
-		"已经有%d名伙伴出现啦~\n鸽子名单：\n",
-	}
-	formatGule = []string{
-		"看啊看啊！%s这家伙咕了哦！",
-	}
+	callMap = make(map[int64]*callType)
 )
 
 func init() {
 	bm.AddCommand(botmaid.Command{
-		Do:       gule,
-		Priority: 10,
-	})
-	bm.AddCommand(botmaid.Command{
-		Do:       callResp,
-		Priority: 10,
-	})
-	bm.AddCommand(botmaid.Command{
-		Do:       callStatus,
-		Priority: 5,
-	})
-	bm.AddCommand(botmaid.Command{
-		Do:       callGugugu,
-		Priority: 5,
-	})
-	bm.AddCommand(botmaid.Command{
-		Do:       call,
-		Priority: 5,
-		Menu:     "call",
-		Names:    []string{"call"},
-		Help: ` <@其他人> - 进行一次点名
-		call -status [-s] - 查看当前点名情况
-		call -gugugu <名称> - 用记录的成员点名
-		咕咕咕 - 溜了溜了`,
-	})
-}
-
-func call(e *api.Event, b *botmaid.Bot) bool {
-	if b.IsCommand(e, "call") {
-		args := botmaid.SplitCommand(e.Message.Text)
-		callMap[e.Place.ID] = &callType{
-			Status: true,
-			Total:  len(args) - 1,
-			Get:    0,
-			List:   make(map[string]bool),
-			Resped: make(map[string]bool),
-		}
-		for i := 1; i < len(args); i++ {
-			callMap[e.Place.ID].List[args[i]] = true
-		}
-		send(api.Event{
-			Message: &api.Message{
-				Text: random.String(wordCallStart),
-			},
-			Place: e.Place,
-		}, b, false)
-		return true
-	}
-	return false
-}
-
-func callGugugu(e *api.Event, b *botmaid.Bot) bool {
-	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "call") && len(args) > 2 && slices.In(args[1], "-gugugu") {
-		theGugugu := dbAbiGugugu{}
-		err := bm.DB.QueryRow("SELECT * FROM abi_gugugu WHERE chat_id = $1 AND name = $2", e.Place.ID, args[2]).Scan(&theGugugu.ID, &theGugugu.PlaceID, &theGugugu.Name, &theGugugu.Members, &theGugugu.At, &theGugugu.Status)
-		if err != nil || theGugugu.At == "" {
-			return true
-		}
-		ee := e
-		ee.Message.Text = "/call " + theGugugu.At
-		call(ee, b)
-		send(api.Event{
-			Message: &api.Message{
-				Text: theGugugu.At,
-			},
-			Place: e.Place,
-		}, b, false)
-		return true
-	}
-	return false
-}
-
-func callStatus(e *api.Event, b *botmaid.Bot) bool {
-	args := botmaid.SplitCommand(e.Message.Text)
-	if b.IsCommand(e, "call") && len(args) > 1 && slices.In(args[1], "-status", "-s") {
-		if _, ok := callMap[e.Place.ID]; !ok || !callMap[e.Place.ID].Status {
-			send(api.Event{
-				Message: &api.Message{
-					Text: random.String(wordCallNotStart),
-				},
-				Place: e.Place,
-			}, b, false)
-			return true
-		}
-		if callMap[e.Place.ID].Get == 0 {
-			send(api.Event{
-				Message: &api.Message{
-					Text: random.String(wordCallNobody),
-				},
-				Place: e.Place,
-			}, b, false)
-			return true
-		}
-		message := fmt.Sprintf(random.String(formatCallList), callMap[e.Place.ID].Get)
-		for key := range callMap[e.Place.ID].List {
-			if !callMap[e.Place.ID].Resped[key] {
-				message += key + " "
+		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+			if strings.HasPrefix(u.Message.Text, "咕") {
+				if _, ok := callMap[u.Chat.ID]; ok && callMap[u.Chat.ID].Status && callMap[u.Chat.ID].List[b.At(u.User)[0]] {
+					callMap[u.Chat.ID].Status = false
+					callMap[u.Chat.ID].List = make(map[string]bool)
+					b.Reply(u, fmt.Sprintf(random.String([]string{
+						"看啊看啊！%v这家伙咕了哦！",
+						"%v说他不在哦_(:з」∠)_今天的玩乐是不是到此为止了呢？",
+					}), u.User.NickName))
+				}
 			}
-		}
-		send(api.Event{
-			Message: &api.Message{
-				Text: message[:len(message)-1],
-			},
-			Place: e.Place,
-		}, b, false)
-		return true
-	}
-	return false
-}
-
-func gule(e *api.Event, b *botmaid.Bot) bool {
-	if b.IsCommand(e, "咕咕", "咕了") {
-		if _, ok := callMap[e.Place.ID]; ok && callMap[e.Place.ID].Status && callMap[e.Place.ID].List[b.At(e.Sender)[0]] {
-			callMap[e.Place.ID].Status = false
-			callMap[e.Place.ID].List = make(map[string]bool)
-			send(api.Event{
-				Message: &api.Message{
-					Text: fmt.Sprintf(random.String(formatGule), e.Sender.NickName),
-				},
-				Place: e.Place,
-			}, b, false)
-		}
-		return false
-	}
-	return false
-}
-
-func callResp(e *api.Event, b *botmaid.Bot) bool {
-	if _, ok := callMap[e.Place.ID]; !ok || !callMap[e.Place.ID].Status {
-		return false
-	}
-	if callMap[e.Place.ID].List[b.At(e.Sender)[0]] && !callMap[e.Place.ID].Resped[b.At(e.Sender)[0]] {
-		callMap[e.Place.ID].Resped[b.At(e.Sender)[0]] = true
-		callMap[e.Place.ID].Get++
-	}
-	if callMap[e.Place.ID].Get == callMap[e.Place.ID].Total {
-		callMap[e.Place.ID].Status = false
-		send(api.Event{
-			Message: &api.Message{
-				Text: random.String(wordCallComplete),
-			},
-			Place: e.Place,
-		}, b, false)
-	}
-	return false
+			return false
+		},
+		Priority: 100,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+			if _, ok := callMap[u.Chat.ID]; !ok || !callMap[u.Chat.ID].Status {
+				return false
+			}
+			if callMap[u.Chat.ID].List[b.At(u.User)[0]] && !callMap[u.Chat.ID].Resped[b.At(u.User)[0]] {
+				callMap[u.Chat.ID].Resped[b.At(u.User)[0]] = true
+				callMap[u.Chat.ID].Get++
+			}
+			if callMap[u.Chat.ID].Get == callMap[u.Chat.ID].Total {
+				callMap[u.Chat.ID].Status = false
+				b.Reply(u, random.String([]string{
+					"调查员都已经聚集好了哦。呵呵，是不是又有什么事情要发生了。",
+					"大家都已经在这里啦，让我们开开心心地开始今天的活动吧，诶嘿嘿☆~",
+				}))
+			}
+			return false
+		},
+		Priority: 100,
+	})
+	bm.AddCommand(botmaid.Command{
+		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+			if botmaid.In(u.Message.Args[1], "status") {
+				if _, ok := callMap[u.Chat.ID]; !ok || !callMap[u.Chat.ID].Status {
+					b.Reply(u, random.String([]string{
+						"好像有什么很热闹的样子呢……我也好想被叫去参加呢。",
+						"稍微有点无聊呢……有没有人带阿比玩啊——",
+					}))
+					return true
+				}
+				if callMap[u.Chat.ID].Get == 0 {
+					b.Reply(u, random.String([]string{
+						"还没有谁在哦，果然大家都是鸽子吧（生气）。",
+						"大家都不知道去哪里啦——有没有人看到他们呀——",
+					}))
+					return true
+				}
+				gu := ""
+				for key := range callMap[u.Chat.ID].List {
+					if !callMap[u.Chat.ID].Resped[key] {
+						gu += key + " "
+					}
+				}
+				gu = gu[:len(gu)-1]
+				b.Reply(u, fmt.Sprintf(random.String([]string{
+					"已经有%v位伙伴出现啦~\n鸽子名单：%v",
+					"刚刚有%v只调查员来过了哦~\n不过%v阿比还没有看见-v-",
+				}), callMap[u.Chat.ID].Get))
+				return true
+			}
+			return false
+		},
+		Menu:       "call",
+		Names:      []string{"call"},
+		ArgsMinLen: 2,
+		ArgsMaxLen: 2,
+		Help:       " status - 查看当前点名情况",
+	})
+	bm.AddCommand(botmaid.Command{
+		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+			callMap[u.Chat.ID] = &callType{
+				Status: true,
+				Total:  len(u.Message.Args) - 1,
+				Get:    0,
+				List:   make(map[string]bool),
+				Resped: make(map[string]bool),
+			}
+			for i := 1; i < len(u.Message.Args); i++ {
+				callMap[u.Chat.ID].List[u.Message.Args[i]] = true
+			}
+			b.Reply(u, random.String([]string{
+				"呵呵呵，看来调查员的召集开始了。",
+				"你们又要演出新的戏剧了吗？阿比也来看吧w",
+			}))
+			return true
+		},
+		Menu:       "call",
+		MenuText:   "点名",
+		Names:      []string{"call"},
+		ArgsMinLen: 2,
+		Help:       " <@其他人> - 进行一次点名",
+	})
 }

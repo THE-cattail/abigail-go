@@ -8,13 +8,10 @@
 	Type = "Telegram"
 	Token = ""
 
-[HTTPServer]
-	Domain = ""
-
-[Database]
-	User = ""
+[Redis]
+	Address = ""
 	Password = ""
-	DBName = ""
+	Database = 0
 
-[Test]
-	Test = true
+[Log]
+	Log = true

@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/catsworld/api"
+	"github.com/catsworld/abigail/coc"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/coc"
 	"github.com/catsworld/random"
 )
 
 type pkRollResult struct {
-	User   *api.User
+	User   *botmaid.User
 	Result coc.CheckResult
 }
 
@@ -20,78 +19,73 @@ type pkType struct {
 }
 
 var (
-	pkMap       = make(map[int64]*pkType)
-	wordPKStart = []string{
-		"开始对抗，请一方roll点。",
-	}
-	wordPKNext = []string{
-		"请另一方roll点。",
-	}
-	wordPKDraw = []string{
-		"对抗结果：平局！",
-	}
-	formatPKWin = []string{
-		"对抗结果：%s胜利！",
-	}
+	pkMap = map[int64]*pkType{}
 )
 
 func init() {
 	bm.AddCommand(botmaid.Command{
-		Do:       pk,
-		Priority: 5,
+		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+			pkMap[u.Chat.ID] = &pkType{
+				Status: true,
+			}
+			send(b, botmaid.Update{
+				Message: &botmaid.Message{
+					Text: random.String([]string{
+						"开始对抗，请一方 roll 点。",
+						"对抗检定~请其中一边先 roll 点~",
+					}),
+				},
+				Chat: u.Chat,
+			}, false, u)
+			return true
+		},
 		Menu:     "pk",
+		MenuText: "对抗检定",
 		Names:    []string{"pk"},
 		Help:     " - 进行一次对抗",
 	})
 }
 
-func pk(e *api.Event, b *botmaid.Bot) bool {
-	if b.IsCommand(e, "pk") {
-		pkMap[e.Place.ID] = &pkType{
-			Status: true,
-		}
-		send(api.Event{
-			Message: &api.Message{
-				Text: random.String(wordPKStart),
-			},
-			Place: e.Place,
-		}, b, false)
-		return true
-	}
-	return false
-}
-
-func pkResp(e *api.Event, b *botmaid.Bot) {
-	if _, ok := pkMap[e.Place.ID]; !ok || !pkMap[e.Place.ID].Status {
+func pkResp(u *botmaid.Update, b *botmaid.Bot) {
+	if _, ok := pkMap[u.Chat.ID]; !ok || !pkMap[u.Chat.ID].Status {
 		return
 	}
-	if len(pkMap[e.Place.ID].Results) == 1 {
-		send(api.Event{
-			Message: &api.Message{
-				Text: random.String(wordPKNext),
+	if len(pkMap[u.Chat.ID].Results) == 1 {
+		send(b, botmaid.Update{
+			Message: &botmaid.Message{
+				Text: random.String([]string{
+					"请另一方 roll 点。",
+					"接下来请另一边 roll 点~",
+				}),
 			},
-			Place: e.Place,
-		}, b, false)
+			Chat: u.Chat,
+		}, false, u)
 		return
 	}
-	pkResult := coc.PK(pkMap[e.Place.ID].Results[0].Result, pkMap[e.Place.ID].Results[1].Result)
+	pkResult := coc.PK(pkMap[u.Chat.ID].Results[0].Result, pkMap[u.Chat.ID].Results[1].Result)
 	message := ""
 	if pkResult == coc.PKDraw {
-		message = random.String(wordPKDraw)
+		message = random.String([]string{
+			"对抗结果：平局！",
+			"这次对抗平局了哦~",
+		})
 	} else {
-		victor := pkMap[e.Place.ID].Results[0].User.NickName
+		victor := pkMap[u.Chat.ID].Results[0].User.NickName
 		if pkResult == coc.PKBWin {
-			victor = pkMap[e.Place.ID].Results[1].User.NickName
+			victor = pkMap[u.Chat.ID].Results[1].User.NickName
 		}
-		message = fmt.Sprintf(random.String(formatPKWin), victor)
+		message = fmt.Sprintf(random.String([]string{
+			"对抗结果：%v胜利！",
+			"这次对抗由%v取得了胜利~",
+		}), victor)
 	}
-	pkMap[e.Place.ID] = &pkType{
+	pkMap[u.Chat.ID] = &pkType{
 		Status: false,
 	}
-	send(api.Event{
-		Message: &api.Message{
+	send(b, botmaid.Update{
+		Message: &botmaid.Message{
 			Text: message,
 		},
-		Place: e.Place,
-	}, b, false)
+		Chat: u.Chat,
+	}, false, u)
 }
