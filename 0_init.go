@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -20,8 +21,8 @@ func init() {
 
 	bm.Words = map[string][]string{
 		"selfIntro": []string{
-			"我是阿比盖尔，他们都叫我塞勒姆的魔女呢，呵呵，可别把我惹急了。%v，要叫出我的话，在命令前敲上“/”、“:”或者“：”就可以了。",
-			"阿比可不是什么坏孩子哦，嘻嘻，%v想要呼唤阿比的话，在命令前敲上“/”、“:”或者“：”就行啦。",
+			fmt.Sprintf("我是阿比盖尔，他们都叫我塞勒姆的魔女呢，呵呵，可别把我惹急了。%%v，要叫出我的话，在命令前敲上%v就可以了。", botmaid.ListToString(bm.Conf.CommandPrefix, "“%v”", "、", "或者")),
+			fmt.Sprintf("阿比可不是什么坏孩子哦，嘻嘻，%%v想要呼唤阿比的话，在命令前敲上%v就行啦。", botmaid.ListToString(bm.Conf.CommandPrefix, "“%v”", "、", "或者")),
 		},
 		"undefCommand": []string{
 			"%v？那是什么啊，乖孩子是不知道的呢。",

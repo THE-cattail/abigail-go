@@ -15,3 +15,6 @@
 
 [Log]
 	Log = true
+
+[Command]
+	Prefix = ["/"]

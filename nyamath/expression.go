@@ -2,164 +2,304 @@ package nyamath
 
 import (
 	"errors"
-	"strconv"
+	"fmt"
+
+	"github.com/catsworld/random"
 )
+
+// Result here.
+type Result struct {
+	Min, Max, Value int
+}
+
+type operator struct {
+	Op       rune
+	LeftComb bool
+}
 
 // Expression stores the infix, sufix and result of a math expression.
 type Expression struct {
-	infix  []interface{}
-	suffix []interface{}
-	result int
+	Infix  []interface{}
+	Suffix []interface{}
+	Result Result
 }
 
-// Result returns the result of the expression e.
-func (e Expression) Result() int {
-	return e.result
+var (
+	priority = map[rune]int{
+		'+': 1,
+		'-': 1,
+		'*': 2,
+		'/': 2,
+		'%': 2,
+		'^': 3,
+		'd': 4,
+	}
+)
+
+func isOperator(operator rune) bool {
+	_, exist := priority[operator]
+	return exist
 }
 
-func (e *Expression) suffix2Result() error {
-	var s []interface{}
+func leftCombination(v rune, last interface{}) bool {
+	if _, ok := last.(rune); ok {
+		return false
+	}
+	return true
+}
 
-	for _, v := range e.suffix {
-		switch v.(type) {
-		case int:
-			s = append(s, v)
-		case string:
-			if !IsUnary(v.(string)) {
-				if len(s) < 2 {
+func calculate(x int, operator rune, y int) (int, error) {
+	if operator == '+' {
+		return x + y, nil
+	} else if operator == '-' {
+		return x - y, nil
+	} else if operator == '*' {
+		return x * y, nil
+	} else if operator == '/' {
+		if y == 0 {
+			return 0, errors.New("Divide by 0")
+		}
+		return x / y, nil
+	} else if operator == '%' {
+		if y == 0 {
+			return 0, errors.New("Divide by 0")
+		}
+		return x % y, nil
+	} else if operator == 'd' {
+		if x > 100 {
+			return 0, errors.New("Too many times")
+		}
+		ret := 0
+		for i := 0; i < x; i++ {
+			ret += random.Int(1, y)
+		}
+		return ret, nil
+	} else if operator == '^' {
+		return Qpow(x, y), nil
+	} else {
+		return 0, errors.New("Invalid operator")
+	}
+}
+
+func calculateMin(x int, operator rune, y int) (int, error) {
+	if operator == 'd' {
+		res1, err := calculate(x, '*', 1)
+		if err != nil {
+			return 0, err
+		}
+		res2, err := calculate(x, '*', y)
+		if err != nil {
+			return 0, err
+		}
+		return Min(res1, res2), nil
+	}
+	return calculate(x, operator, y)
+}
+
+func calculateMax(x int, operator rune, y int) (int, error) {
+	if operator == 'd' {
+		res1, err := calculate(x, '*', 1)
+		if err != nil {
+			return 0, err
+		}
+		res2, err := calculate(x, '*', y)
+		if err != nil {
+			return 0, err
+		}
+		return Max(res1, res2), nil
+	}
+	return calculate(x, operator, y)
+}
+
+func calculateU(unary rune, x int) (int, error) {
+	if unary == '-' {
+		return -x, nil
+	} else if unary == '+' {
+		return x, nil
+	} else if unary == 'd' {
+		return random.Int(1, x), nil
+	} else {
+		return 0, errors.New("Invalid unary")
+	}
+}
+
+func (e *Expression) string2Infix(s string) error {
+	nowNumber := 0
+	nowNumberFlag := false
+	for _, v := range s {
+		if IsNumber(v) {
+			if len(e.Infix) > 0 {
+				if _, ok := e.Infix[len(e.Infix)-1].(int); ok {
 					return errors.New("Invalid expression")
 				}
-				b := s[len(s)-1]
-				s = s[:len(s)-1]
-				a := s[len(s)-1]
-				s = s[:len(s)-1]
-				c, err := Calculate(a.(int), v.(string), b.(int))
-				if err != nil {
-					return errors.New(err.Error())
-				}
-				s = append(s, c)
-			} else {
-				if len(s) < 1 {
-					return errors.New("Invalid expression")
-				}
-				top := s[len(s)-1]
-				s = s[:len(s)-1]
-				top, _ = CalculateU(v.(string), top.(int))
-				s = append(s, top)
+			}
+			nowNumber = nowNumber*10 + int(v-'0')
+			nowNumberFlag = true
+		} else {
+			if nowNumberFlag {
+				e.Infix = append(e.Infix, nowNumber)
+				nowNumber = 0
+				nowNumberFlag = false
+			}
+			if v != ' ' {
+				e.Infix = append(e.Infix, v)
 			}
 		}
 	}
-
-	ans := s[len(s)-1]
-	s = s[:len(s)-1]
-	e.result = ans.(int)
+	if nowNumberFlag {
+		e.Infix = append(e.Infix, nowNumber)
+	}
 	return nil
 }
 
 func (e *Expression) infix2Suffix() error {
-	var s []interface{}
-
-	for _, v := range e.infix {
-		switch v.(type) {
+	stack := []*operator{}
+	last := new(interface{})
+	for _, symbol := range e.Infix {
+		switch v := symbol.(type) {
 		case int:
-			e.suffix = append(e.suffix, v)
-		case string:
-			if v == "(" {
-				s = append(s, v)
-			} else if v == ")" {
-				if len(s) < 1 {
-					return errors.New("err")
+			e.Suffix = append(e.Suffix, v)
+		case rune:
+			if isOperator(v) {
+				for len(stack) > 0 && ((leftCombination(v, last) && priority[v] <= priority[stack[len(stack)-1].Op]) || (!leftCombination(v, last) && priority[v] < priority[stack[len(stack)-1].Op])) {
+					e.Suffix = append(e.Suffix, stack[len(stack)-1])
+					stack = stack[:len(stack)-1]
 				}
-				top := s[len(s)-1]
-				s = s[:len(s)-1]
-				for top != "(" {
-					e.suffix = append(e.suffix, top)
-					if len(s) < 1 {
-						return errors.New("err")
-					}
-					top = s[len(s)-1]
-					s = s[:len(s)-1]
+				stack = append(stack, &operator{
+					Op:       v,
+					LeftComb: leftCombination(v, last),
+				})
+			} else if v == '(' {
+				stack = append(stack, &operator{
+					Op: v,
+				})
+			} else if v == ')' {
+				for len(stack) > 0 && stack[len(stack)-1].Op != '(' {
+					e.Suffix = append(e.Suffix, stack[len(stack)-1])
+					stack = stack[:len(stack)-1]
 				}
+				if len(stack) == 0 || stack[len(stack)-1].Op != '(' {
+					return errors.New("Invalid expression")
+				}
+				stack = stack[:len(stack)-1]
 			} else {
-				if len(s) == 0 {
-					s = append(s, v)
-				} else {
-					p1 := Priority(v.(string))
-					top := s[len(s)-1]
-					s = s[:len(s)-1]
-					p2 := Priority(top.(string))
-					for len(s) > 0 && p1 < p2 {
-						e.suffix = append(e.suffix, top)
-						s = s[:len(s)-1]
-						if len(s) < 1 {
-							return errors.New("err")
-						}
-						top := s[len(s)-1]
-						p2 = Priority(top.(string))
-					}
-					s = append(s, v)
-				}
+				return errors.New("Invalid expression")
 			}
 		}
 	}
-
-	for len(s) > 0 {
-		top := s[len(s)-1]
-		s = s[:len(s)-1]
-		e.suffix = append(e.suffix, top)
+	for len(stack) > 0 {
+		if stack[len(stack)-1].Op == '(' || stack[len(stack)-1].Op == ')' {
+			return errors.New("Invalid expression")
+		}
+		e.Suffix = append(e.Suffix, stack[len(stack)-1])
+		stack = stack[:len(stack)-1]
 	}
 	return nil
 }
 
-func (e *Expression) string2Infix(s string) error {
-	snum := ""
-	last := '#'
-
-	for _, v := range s {
-		if v == ' ' {
-			continue
-		}
-		if IsNumber(v) {
-			snum = snum + string(v)
-		} else if Valid(string(v)) {
-			if len(snum) > 0 {
-				num, _ := strconv.Atoi(snum)
-				e.infix = append(e.infix, int(num))
-				snum = ""
+func (e *Expression) suffix2Result() error {
+	stack := []*Result{}
+	for _, symbol := range e.Suffix {
+		switch v := symbol.(type) {
+		case int:
+			stack = append(stack, &Result{
+				Min:   v,
+				Max:   v,
+				Value: v,
+			})
+		case *operator:
+			if (v.LeftComb && len(stack) < 2) || (!v.LeftComb && len(stack) < 1) {
+				return errors.New("Invalid expression")
 			}
-			if v != '(' && last != ')' && !IsNumber(last) {
-				o := "u" + string(v)
-				if !Valid(o) {
-					return errors.New("Invalid operator")
+			if v.LeftComb {
+				res, err := calculate(stack[len(stack)-2].Value, v.Op, stack[len(stack)-1].Value)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
 				}
-				e.infix = append(e.infix, o)
+				res1, err := calculateMin(stack[len(stack)-2].Min, v.Op, stack[len(stack)-1].Min)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				res2, err := calculateMin(stack[len(stack)-2].Min, v.Op, stack[len(stack)-1].Max)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				res3, err := calculateMin(stack[len(stack)-2].Max, v.Op, stack[len(stack)-1].Min)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				res4, err := calculateMin(stack[len(stack)-2].Max, v.Op, stack[len(stack)-1].Max)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				resMin := Min(res1, res2, res3, res4)
+				res1, err = calculateMax(stack[len(stack)-2].Min, v.Op, stack[len(stack)-1].Min)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				res2, err = calculateMax(stack[len(stack)-2].Min, v.Op, stack[len(stack)-1].Max)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				res3, err = calculateMax(stack[len(stack)-2].Max, v.Op, stack[len(stack)-1].Min)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				res4, err = calculateMax(stack[len(stack)-2].Max, v.Op, stack[len(stack)-1].Max)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				resMax := Max(res1, res2, res3, res4)
+				stack = stack[:len(stack)-2]
+				stack = append(stack, &Result{
+					Min:   resMin,
+					Max:   resMax,
+					Value: res,
+				})
 			} else {
-				e.infix = append(e.infix, string(v))
+				res, err := calculateU(v.Op, stack[len(stack)-1].Value)
+				if err != nil {
+					return fmt.Errorf("Calculating: %v", err)
+				}
+				resMin := 0
+				resMax := 0
+				if v.Op == 'd' {
+					resMin, err = calculateU('+', 1)
+					resMax, err = calculateU('+', stack[len(stack)-1].Value)
+				} else {
+					resMin = res
+					resMax = res
+				}
+				stack = stack[:len(stack)-1]
+				stack = append(stack, &Result{
+					Min:   resMin,
+					Max:   resMax,
+					Value: res,
+				})
 			}
-		} else {
-			return errors.New("Invalid operator")
 		}
-		last = v
 	}
-
-	if len(snum) > 0 {
-		num, _ := strconv.Atoi(snum)
-		e.infix = append(e.infix, int(num))
+	if len(stack) != 1 {
+		return errors.New("Invalid expression")
 	}
+	e.Result = *stack[0]
 	return nil
 }
 
 // New generates a expression from the string s.
-func New(s string) (Expression, error) {
-	var e Expression
-	if err := e.string2Infix(s); err != nil {
-		return e, err
+func New(s string) (*Expression, error) {
+	e := &Expression{}
+	err := e.string2Infix(s)
+	if err != nil {
+		return nil, fmt.Errorf("Generating new expression: %v", err)
 	}
-	if err := e.infix2Suffix(); err != nil {
-		return e, err
+	err = e.infix2Suffix()
+	if err != nil {
+		return nil, fmt.Errorf("Generating new expression: %v", err)
 	}
-	if err := e.suffix2Result(); err != nil {
-		return e, err
+	err = e.suffix2Result()
+	if err != nil {
+		return nil, fmt.Errorf("Generating new expression: %v", err)
 	}
 	return e, nil
 }

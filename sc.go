@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/catsworld/abigail/coc"
@@ -86,19 +85,21 @@ func init() {
 
 func scResp(u *botmaid.Update, b *botmaid.Bot) {
 	time.Sleep(time.Second * 2)
-	ee := nyamath.Expression{}
+	ea, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
+	eb, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
+	res := 0
 	if scMap[u.Chat.ID][u.User.ID].Result.BigSuccess() {
-		ee, _ = nyamath.New(strings.Replace(scMap[u.Chat.ID][u.User.ID].a, "d", "+0*", -1))
+		res = ea.Result.Min
 	} else if scMap[u.Chat.ID][u.User.ID].Result.BigFailure() {
-		ee, _ = nyamath.New(strings.Replace(scMap[u.Chat.ID][u.User.ID].b, "d", "*", -1))
+		res = eb.Result.Max
 	} else if scMap[u.Chat.ID][u.User.ID].Result.Success() {
-		ee, _ = nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
+		res = ea.Result.Value
 	} else {
-		ee, _ = nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
+		res = eb.Result.Value
 	}
 	message := fmt.Sprintf(random.String([]string{
 		"%s，汝的理智损失了 %d 点。",
-	}), u.User.NickName, ee.Result())
+	}), u.User.NickName, res)
 	scMap[u.Chat.ID][u.User.ID] = &scType{
 		Status: false,
 	}

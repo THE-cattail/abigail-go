@@ -21,3 +21,31 @@ func Qpow(x, y int) int {
 	}
 	return ret
 }
+
+// Min returns the minimize integer in the slice.
+func Min(a ...int) int {
+	if len(a) == 0 {
+		return 0
+	}
+	res := a[0]
+	for _, v := range a {
+		if v < res {
+			res = v
+		}
+	}
+	return res
+}
+
+// Max returns the maximum integer in the slice.
+func Max(a ...int) int {
+	if len(a) == 0 {
+		return 0
+	}
+	res := a[0]
+	for _, v := range a {
+		if v > res {
+			res = v
+		}
+	}
+	return res
+}

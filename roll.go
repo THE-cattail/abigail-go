@@ -209,7 +209,7 @@ func init() {
 			}
 			send(b, botmaid.Update{
 				Message: &botmaid.Message{
-					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction, ee.Result()),
+					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction, ee.Result.Value),
 				},
 				Chat: u.Chat,
 			}, hide[u.ID], u)
