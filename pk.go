@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			pkMap[u.Chat.ID] = &pkType{
 				Status: true,

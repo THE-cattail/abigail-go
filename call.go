@@ -21,12 +21,12 @@ var (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if strings.HasPrefix(u.Message.Text, "咕") {
 				if _, ok := callMap[u.Chat.ID]; ok && callMap[u.Chat.ID].Status && callMap[u.Chat.ID].List[b.At(u.User)[0]] {
 					callMap[u.Chat.ID].Status = false
-					callMap[u.Chat.ID].List = make(map[string]bool)
+					callMap[u.Chat.ID].List = map[string]bool{}
 					b.Reply(u, fmt.Sprintf(random.String([]string{
 						"看啊看啊！%v这家伙咕了哦！",
 						"%v说他不在哦_(:з」∠)_今天的玩乐是不是到此为止了呢？",
@@ -35,9 +35,9 @@ func init() {
 			}
 			return false
 		},
-		Priority: 100,
+		Priority: 1000,
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if _, ok := callMap[u.Chat.ID]; !ok || !callMap[u.Chat.ID].Status {
 				return false
@@ -55,9 +55,9 @@ func init() {
 			}
 			return false
 		},
-		Priority: 100,
+		Priority: 1000,
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if botmaid.In(u.Message.Args[1], "status") {
 				if _, ok := callMap[u.Chat.ID]; !ok || !callMap[u.Chat.ID].Status {
@@ -84,7 +84,7 @@ func init() {
 				b.Reply(u, fmt.Sprintf(random.String([]string{
 					"已经有%v位伙伴出现啦~\n鸽子名单：%v",
 					"刚刚有%v只调查员来过了哦~\n不过%v阿比还没有看见-v-",
-				}), callMap[u.Chat.ID].Get))
+				}), callMap[u.Chat.ID].Get, gu))
 				return true
 			}
 			return false
@@ -95,14 +95,14 @@ func init() {
 		ArgsMaxLen: 2,
 		Help:       " status - 查看当前点名情况",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			callMap[u.Chat.ID] = &callType{
 				Status: true,
 				Total:  len(u.Message.Args) - 1,
 				Get:    0,
-				List:   make(map[string]bool),
-				Resped: make(map[string]bool),
+				List:   map[string]bool{},
+				Resped: map[string]bool{},
 			}
 			for i := 1; i < len(u.Message.Args); i++ {
 				callMap[u.Chat.ID].List[u.Message.Args[i]] = true

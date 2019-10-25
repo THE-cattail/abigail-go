@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			b.Reply(u, random.String([]string{
 				"What has risen may sink, and what is sunk may rise… Cthulhu still lives\n（升起的或许会沉没，而沉没的也将会升起……克苏鲁永在。）",

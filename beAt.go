@@ -10,7 +10,7 @@ var (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if b.BeAt(u) && b.IsMaster(u.User) {
 				b.Reply(u, random.String([]string{
@@ -46,7 +46,7 @@ func init() {
 			return false
 		},
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if b.BeAt(u) {
 				b.Reply(u, random.String([]string{

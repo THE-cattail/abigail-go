@@ -9,17 +9,17 @@ import (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			p := "cn"
 			if len(u.Message.Args) > 1 {
 				p = u.Message.Args[1]
 			}
-			if p == "cn" {
+			if botmaid.In(p, "cn", "中", "中文") {
 				b.Reply(u, rand.GetRand().ChineseName())
-			} else if p == "en" {
+			} else if botmaid.In(p, "en", "英", "英文") {
 				b.Reply(u, randomdata.FullName(randomdata.RandomGender))
-			} else if p == "jp" {
+			} else if botmaid.In(p, "jp", "日", "日文") {
 				name := gimei.NewName()
 				b.Reply(u, name.Kanji())
 			} else {

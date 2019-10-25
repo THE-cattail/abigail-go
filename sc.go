@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if scMap[u.Chat.ID] == nil {
 				scMap[u.Chat.ID] = map[int64]*scType{}
@@ -88,11 +88,11 @@ func scResp(u *botmaid.Update, b *botmaid.Bot) {
 	ea, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
 	eb, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
 	res := 0
-	if scMap[u.Chat.ID][u.User.ID].Result.BigSuccess() {
+	if scMap[u.Chat.ID][u.User.ID].Result.Great == coc.GreatSucc {
 		res = ea.Result.Min
-	} else if scMap[u.Chat.ID][u.User.ID].Result.BigFailure() {
+	} else if scMap[u.Chat.ID][u.User.ID].Result.Great == coc.GreatFail {
 		res = eb.Result.Max
-	} else if scMap[u.Chat.ID][u.User.ID].Result.Success() {
+	} else if scMap[u.Chat.ID][u.User.ID].Result.Succ == coc.Succ {
 		res = ea.Result.Value
 	} else {
 		res = eb.Result.Value

@@ -7,17 +7,18 @@ import (
 	"github.com/catsworld/random"
 )
 
-// Result here.
+// Result includes the minimize, maximum and exact result of an expression.
 type Result struct {
 	Min, Max, Value int
 }
 
-type operator struct {
+// Operator includes some information of an operator.
+type Operator struct {
 	Op       rune
 	LeftComb bool
 }
 
-// Expression stores the infix, sufix and result of a math expression.
+// Expression includes the infix, sufix and result of a math expression.
 type Expression struct {
 	Infix  []interface{}
 	Suffix []interface{}
@@ -153,7 +154,7 @@ func (e *Expression) string2Infix(s string) error {
 }
 
 func (e *Expression) infix2Suffix() error {
-	stack := []*operator{}
+	stack := []*Operator{}
 	last := new(interface{})
 	for _, symbol := range e.Infix {
 		switch v := symbol.(type) {
@@ -165,12 +166,12 @@ func (e *Expression) infix2Suffix() error {
 					e.Suffix = append(e.Suffix, stack[len(stack)-1])
 					stack = stack[:len(stack)-1]
 				}
-				stack = append(stack, &operator{
+				stack = append(stack, &Operator{
 					Op:       v,
 					LeftComb: leftCombination(v, last),
 				})
 			} else if v == '(' {
-				stack = append(stack, &operator{
+				stack = append(stack, &Operator{
 					Op: v,
 				})
 			} else if v == ')' {
@@ -207,7 +208,7 @@ func (e *Expression) suffix2Result() error {
 				Max:   v,
 				Value: v,
 			})
-		case *operator:
+		case *Operator:
 			if (v.LeftComb && len(stack) < 2) || (!v.LeftComb && len(stack) < 1) {
 				return errors.New("Invalid expression")
 			}

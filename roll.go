@@ -20,14 +20,14 @@ var (
 )
 
 func init() {
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
-			if botmaid.In(u.Message.Args[1], "final") {
+			if botmaid.In(u.Message.Args[1], "summary", "sum") {
 				send(b, botmaid.Update{
 					Message: &botmaid.Message{
 						Text: fmt.Sprintf(random.String([]string{
-							"%s，汝已陷入了疯狂：\n",
-						}), u.User.NickName) + coc.RollMadFinal(),
+							"%s，汝已陷入了临时疯狂：\n",
+						}), u.User.NickName) + coc.RollMadSummary(),
 					},
 					Chat: u.Chat,
 				}, hide[u.ID], u)
@@ -39,14 +39,14 @@ func init() {
 		Names:      []string{"mad"},
 		ArgsMinLen: 2,
 		ArgsMaxLen: 2,
-		Help:       " final - roll 一次疯狂的总结症状",
+		Help:       " summary - roll 一次疯狂的总结症状",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			send(b, botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String([]string{
-						"%s，汝已陷入了疯狂：\n",
+						"%s，汝已陷入了临时疯狂：\n",
 					}), u.User.NickName) + coc.RollMad(),
 				},
 				Chat: u.Chat,
@@ -59,9 +59,9 @@ func init() {
 		ArgsMaxLen: 1,
 		Help:       " - roll 一次疯狂的即时症状",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
-			c := coc.RollCharacter()
+			c := coc.NewCharacter()
 			message := random.String([]string{
 				"这是你的属性：",
 			}) + "\n"
@@ -81,9 +81,7 @@ func init() {
 						"你是这样的：",
 					}) + c.Description + "\n"
 				*/
-				message += random.String([]string{
-					"你的信念是这样的：",
-				}) + c.Thought + "\n"
+				message += c.Thought + "\n"
 				message += random.String([]string{
 					"你的重要之人是",
 				}) + c.Person + random.String([]string{
@@ -116,7 +114,7 @@ func init() {
 		ArgsMaxLen: 2,
 		Help:       " (full) - roll一张人物卡",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			if botmaid.In(u.Message.Args[1], "hide") {
 				hide[u.ID] = true
@@ -128,7 +126,7 @@ func init() {
 		ArgsMinLen: 2,
 		Help:       " hide - 进行一次暗骰",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			instruction := ""
 			exp := ""
@@ -157,8 +155,8 @@ func init() {
 			if err != nil {
 				return false
 			}
-			if a > 256 {
-				a = 256
+			if a > 1000000 {
+				a = 1000000
 			}
 			result := ""
 			if a == 1 {
@@ -185,7 +183,7 @@ func init() {
 			return true
 		},
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			instruction := "计算结果"
 			exp := ""
@@ -216,7 +214,7 @@ func init() {
 			return true
 		},
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			instruction := ""
 			num := ""
@@ -242,38 +240,38 @@ func init() {
 			}
 			result := coc.Check(n)
 			message := strconv.Itoa(result.Number)
-			if n > 0 && n < 100 {
+			if n > 0 {
 				message = strconv.Itoa(n) + "/" + message
-			}
-			if result.BigSuccess() {
-				message += "！" + random.String([]string{
-					"大成功",
-					"☆大☆成☆功☆",
-				})
-			} else if result.BigFailure() {
-				message += "！" + random.String([]string{
-					"大失败",
-					"大失败 Q皿Q",
-				})
-			} else if result.HardSuccess() {
-				message += "！" + random.String([]string{
-					"困难成功",
-				})
-			} else if result.VeryHardSuccess() {
-				message += "！" + random.String([]string{
-					"极难成功",
-				})
-			} else if result.Success() {
-				message += "！" + random.String([]string{
-					"检定成功",
-				})
-			} else if result.Failure() {
-				message += "！" + random.String([]string{
-					"检定失败",
-				})
+				if result.Great == coc.GreatSucc {
+					message += "！" + random.String([]string{
+						"大成功",
+						"☆大☆成☆功☆",
+					})
+				} else if result.Great == coc.GreatFail {
+					message += "！" + random.String([]string{
+						"大失败",
+						"大失败 Q皿Q",
+					})
+				} else if result.Level == coc.DiffSucc {
+					message += "！" + random.String([]string{
+						"困难成功",
+					})
+				} else if result.Level == coc.ExDiffSucc {
+					message += "！" + random.String([]string{
+						"极难成功",
+					})
+				} else if result.Succ == coc.Succ {
+					message += "！" + random.String([]string{
+						"检定成功",
+					})
+				} else if result.Succ == coc.Fail {
+					message += "！" + random.String([]string{
+						"检定失败",
+					})
+				}
 			}
 			message = fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction+"检定结果", message)
-			if result.Success() {
+			if result.Succ == coc.Succ {
 				message += botmaid.WordSlice{
 					botmaid.Word{
 						Word:   "",
@@ -319,7 +317,7 @@ func init() {
 		Names:    []string{"roll", "r"},
 		Help:     " <说明（可省略）> <表达式（可省略）> - 进行一次表达式计算/检定",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			send(b, botmaid.Update{
 				Message: &botmaid.Message{
@@ -333,7 +331,7 @@ func init() {
 		Names: []string{"roll", "r"},
 		Help:  " <列表> - 对列表进行随机抽取",
 	})
-	bm.AddCommand(botmaid.Command{
+	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
 			instruction := ""
 			exp := ""

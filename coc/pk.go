@@ -1,26 +1,28 @@
 package coc
 
 var (
-	// PKAWin here.
+	// PKAWin means that A is the winner in this PK.
 	PKAWin = -1
-	// PKDraw here.
+	// PKDraw means that the result of this PK is a draw.
 	PKDraw = 0
-	// PKBWin here.
+	// PKBWin means that B is the winner in this PK.
 	PKBWin = 1
 )
 
-// PK here.
+// PK returns the result of a PK.
 func PK(a, b CheckResult) int {
-	if a.BigSuccess() && b.BigSuccess() {
+	if a.Great == GreatSucc && b.Great == GreatSucc {
 		return PKDraw
 	}
-	if a.BigSuccess() {
+
+	if a.Great == GreatSucc {
 		return PKAWin
 	}
-	if b.BigSuccess() {
+	if b.Great == GreatSucc {
 		return PKBWin
 	}
-	if a.Success() && b.Success() {
+
+	if a.Succ == Succ && b.Succ == Succ {
 		if a.Level == b.Level {
 			return PKDraw
 		} else if a.Level > b.Level {
@@ -29,11 +31,13 @@ func PK(a, b CheckResult) int {
 			return PKBWin
 		}
 	}
-	if a.Success() {
+
+	if a.Succ == Succ {
 		return PKAWin
 	}
-	if b.Success() {
+	if b.Succ == Succ {
 		return PKBWin
 	}
+
 	return PKDraw
 }
