@@ -17,7 +17,7 @@ type scType struct {
 }
 
 var (
-	scMap = make(map[int64]map[int64]*scType)
+	scMap = map[int64]map[int64]*scType{}
 )
 
 func init() {
@@ -44,15 +44,15 @@ func init() {
 				}
 			}
 			if scMap[u.Chat.ID][u.User.ID] == nil {
-				return true
+				return false
 			}
 			_, err := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
 			if err != nil {
-				return true
+				return false
 			}
 			_, err = nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
 			if err != nil {
-				return true
+				return false
 			}
 			message := botmaid.WordSlice{
 				botmaid.Word{
