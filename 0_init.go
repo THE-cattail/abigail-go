@@ -28,9 +28,6 @@ func init() {
 			"%v？那是什么啊，乖孩子是不知道的呢。",
 			"%v？抱歉哦，阿比不知道呢OvO。",
 		},
-		"invalidMaster": []string{
-			"要用 At 和我说哦，不然我也没法知道%v的用户名呢。",
-		},
 		"masterExisted": []string{
 			"%v已经是我的御主了。",
 		},

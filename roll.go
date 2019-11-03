@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -305,6 +306,7 @@ func init() {
 				pkResp(u, b)
 			}
 			if _, ok := scMap[u.Chat.ID]; ok {
+				log.Println(scMap[u.Chat.ID][u.User.ID])
 				if _, ok := scMap[u.Chat.ID][u.User.ID]; ok && scMap[u.Chat.ID][u.User.ID].Status && n > 0 && n < 100 {
 					scMap[u.Chat.ID][u.User.ID].Result = result
 					scResp(u, b)
