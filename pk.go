@@ -5,7 +5,7 @@ import (
 
 	"github.com/catsworld/abigail/coc"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 )
 
 type pkRollResult struct {
@@ -24,11 +24,11 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			pkMap[u.Chat.ID] = &pkType{
 				Status: true,
 			}
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: random.String([]string{
 						"开始对抗，请一方 roll 点。",
@@ -46,12 +46,12 @@ func init() {
 	})
 }
 
-func pkResp(u *botmaid.Update, b *botmaid.Bot) {
+func pkResp(u *botmaid.Update) {
 	if _, ok := pkMap[u.Chat.ID]; !ok || !pkMap[u.Chat.ID].Status {
 		return
 	}
 	if len(pkMap[u.Chat.ID].Results) == 1 {
-		send(b, botmaid.Update{
+		send(&botmaid.Update{
 			Message: &botmaid.Message{
 				Text: random.String([]string{
 					"请另一方 roll 点。",
@@ -82,7 +82,7 @@ func pkResp(u *botmaid.Update, b *botmaid.Bot) {
 	pkMap[u.Chat.ID] = &pkType{
 		Status: false,
 	}
-	send(b, botmaid.Update{
+	send(&botmaid.Update{
 		Message: &botmaid.Message{
 			Text: message,
 		},

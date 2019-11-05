@@ -7,7 +7,7 @@ import (
 	"github.com/catsworld/abigail/coc"
 	"github.com/catsworld/abigail/nyamath"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 )
 
 type scType struct {
@@ -22,7 +22,7 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			if scMap[u.Chat.ID] == nil {
 				scMap[u.Chat.ID] = map[int64]*scType{}
 			}
@@ -54,19 +54,19 @@ func init() {
 			if err != nil {
 				return false
 			}
-			message := botmaid.WordSlice{
-				botmaid.Word{
+			message := random.WordSlice{
+				random.Word{
 					Word:   "",
 					Weight: 99,
 				},
-				botmaid.Word{
+				random.Word{
 					Word:   "你将会遇见一只小阿比(*^▽^*)~\n",
 					Weight: 1,
 				},
 			}.Random() + fmt.Sprintf(random.String([]string{
 				"%s，请进行一次意志检定。",
 			}), u.User.NickName)
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: message,
 				},
@@ -83,7 +83,7 @@ func init() {
 	})
 }
 
-func scResp(u *botmaid.Update, b *botmaid.Bot) {
+func scResp(u *botmaid.Update) {
 	time.Sleep(time.Second * 2)
 	ea, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
 	eb, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
@@ -103,7 +103,7 @@ func scResp(u *botmaid.Update, b *botmaid.Bot) {
 	scMap[u.Chat.ID][u.User.ID] = &scType{
 		Status: false,
 	}
-	send(b, botmaid.Update{
+	send(&botmaid.Update{
 		Message: &botmaid.Message{
 			Text: message,
 		},

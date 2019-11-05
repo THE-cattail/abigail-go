@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 )
 
 func init() {
@@ -17,15 +17,15 @@ func init() {
 		Frequency: time.Hour * 24,
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			rp := ""
 			can := ""
 			cannot := ""
 
-			if bm.Redis.HExists("jrrp", fmt.Sprintf("%v_%v_rp", b.ID, u.User.ID)).Val() {
-				rp = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_rp", b.ID, u.User.ID)).Val()
-				can = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_can", b.ID, u.User.ID)).Val()
-				cannot = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_cannot", b.ID, u.User.ID)).Val()
+			if bm.Redis.HExists("jrrp", fmt.Sprintf("%v_%v_rp", u.Bot.ID, u.User.ID)).Val() {
+				rp = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_rp", u.Bot.ID, u.User.ID)).Val()
+				can = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_can", u.Bot.ID, u.User.ID)).Val()
+				cannot = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_cannot", u.Bot.ID, u.User.ID)).Val()
 			} else {
 				rp = fmt.Sprintf("%v", random.Int(1, 100))
 
@@ -292,17 +292,17 @@ func init() {
 					cannot = random.String(jrrpEvent)
 				}
 
-				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_rp", b.ID, u.User.ID), rp)
-				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_can", b.ID, u.User.ID), can)
-				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_cannot", b.ID, u.User.ID), cannot)
+				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_rp", u.Bot.ID, u.User.ID), rp)
+				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_can", u.Bot.ID, u.User.ID), can)
+				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_cannot", u.Bot.ID, u.User.ID), cannot)
 			}
 
-			b.Reply(u, fmt.Sprintf((botmaid.WordSlice{
-				botmaid.Word{
+			botmaid.Reply(u, fmt.Sprintf((random.WordSlice{
+				random.Word{
 					Word:   "%v今日的人品值是——%v，宜%v，忌%v",
 					Weight: 49,
 				},
-				botmaid.Word{
+				random.Word{
 					Word:   "%v今天有%v点人品，宜%v，忌%v，可不要把人品值用光了哦XD",
 					Weight: 1,
 				},

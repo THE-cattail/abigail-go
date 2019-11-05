@@ -2,7 +2,7 @@ package coc
 
 import (
 	"github.com/catsworld/abigail/nyamath"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 )
 
 // Character includes some attributes of a character.
