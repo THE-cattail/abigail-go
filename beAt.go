@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 )
 
 var (
@@ -11,9 +11,9 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
-			if b.BeAt(u) && b.IsMaster(u.User) {
-				b.Reply(u, random.String([]string{
+		Do: func(u *botmaid.Update) bool {
+			if bm.BeAt(u) && bm.IsMaster(u.User) {
+				botmaid.Reply(u, random.String([]string{
 					"i'a、i'a……呵呵呵呵……",
 					"我既已知晓了『门』。汝，肯定无法看见。",
 					"啊……再等一下。很快就结束啰……",
@@ -47,9 +47,9 @@ func init() {
 		},
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
-			if b.BeAt(u) {
-				b.Reply(u, random.String([]string{
+		Do: func(u *botmaid.Update) bool {
+			if bm.BeAt(u) {
+				botmaid.Reply(u, random.String([]string{
 					"i'a、i'a……呵呵呵呵",
 					"我既已知晓了『门』。汝，肯定无法看见。",
 					"啊……再等一下。很快就结束啰……",

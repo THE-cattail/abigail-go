@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 
 	_ "github.com/lib/pq"
 )
@@ -24,9 +24,9 @@ func main() {
 	}
 }
 
-func send(b *botmaid.Bot, u botmaid.Update, hide bool, origin *botmaid.Update) (botmaid.Update, error) {
+func send(u *botmaid.Update, hide bool, origin *botmaid.Update) (*botmaid.Update, error) {
 	if hide {
-		b.Reply(&u, fmt.Sprintf(random.String([]string{
+		botmaid.Reply(u, fmt.Sprintf(random.String([]string{
 			"%v的暗骰。",
 			"%v进行了一次暗骰。",
 			"%v开始暗骰了，没人知道到底发生了什么~",
@@ -38,5 +38,5 @@ func send(b *botmaid.Bot, u botmaid.Update, hide bool, origin *botmaid.Update) (
 			Type: "private",
 		}
 	}
-	return b.API.Push(u)
+	return (*origin.Bot.API).Push(u)
 }

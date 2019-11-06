@@ -4,7 +4,7 @@ import "github.com/catsworld/botmaid"
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			return true
 		},
 		Menu:       "record",

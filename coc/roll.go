@@ -1,6 +1,6 @@
 package coc
 
-import "github.com/catsworld/random"
+import "github.com/catsworld/botmaid/random"
 
 // CheckResult here.
 type CheckResult struct {

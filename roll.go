@@ -9,7 +9,7 @@ import (
 	"github.com/catsworld/abigail/coc"
 	"github.com/catsworld/abigail/nyamath"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/random"
+	"github.com/catsworld/botmaid/random"
 )
 
 var (
@@ -22,9 +22,9 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			if botmaid.In(u.Message.Args[1], "summary", "sum") {
-				send(b, botmaid.Update{
+				send(&botmaid.Update{
 					Message: &botmaid.Message{
 						Text: fmt.Sprintf(random.String([]string{
 							"%s，汝已陷入了临时疯狂：\n",
@@ -43,8 +43,8 @@ func init() {
 		Help:       " summary - roll 一次疯狂的总结症状",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
-			send(b, botmaid.Update{
+		Do: func(u *botmaid.Update) bool {
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String([]string{
 						"%s，汝已陷入了临时疯狂：\n",
@@ -61,7 +61,7 @@ func init() {
 		Help:       " - roll 一次疯狂的即时症状",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			c := coc.NewCharacter()
 			message := random.String([]string{
 				"这是你的属性：",
@@ -98,7 +98,7 @@ func init() {
 					"你是一个",
 				}) + c.Feature
 			}
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String([]string{
 						"这就是%s新的调查员哦。\n",
@@ -116,7 +116,7 @@ func init() {
 		Help:       " (full) - roll一张人物卡",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			if botmaid.In(u.Message.Args[1], "hide") {
 				hide[u.ID] = true
 				u.Message.Text = strings.Replace(u.Message.Text, "hide", "", 1)
@@ -128,13 +128,13 @@ func init() {
 		Help:       " hide - 进行一次暗骰",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			instruction := ""
 			exp := ""
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
 				exp = u.Message.Args[1]
 			}
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
 				instruction = u.Message.Args[1]
 				exp = u.Message.Args[2]
 			}
@@ -175,7 +175,7 @@ func init() {
 				}
 				result += ") = " + strconv.Itoa(sum)
 			}
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction+"检定结果", result),
 				},
@@ -185,13 +185,13 @@ func init() {
 		},
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			instruction := "计算结果"
 			exp := ""
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
 				exp = u.Message.Args[1]
 			}
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
 				instruction = u.Message.Args[1]
 				exp = u.Message.Args[2]
 			}
@@ -206,7 +206,7 @@ func init() {
 			if err != nil {
 				return false
 			}
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction, ee.Result.Value),
 				},
@@ -216,13 +216,13 @@ func init() {
 		},
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			instruction := ""
 			num := ""
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 1 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 1 {
 				num = "0"
 			}
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
 				_, err := strconv.Atoi(u.Message.Args[1])
 				if err != nil {
 					instruction = u.Message.Args[1]
@@ -231,7 +231,7 @@ func init() {
 					num = u.Message.Args[1]
 				}
 			}
-			if b.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
 				instruction = u.Message.Args[1]
 				num = u.Message.Args[2]
 			}
@@ -273,26 +273,26 @@ func init() {
 			}
 			message = fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction+"检定结果", message)
 			if result.Succ == coc.Succ {
-				message += botmaid.WordSlice{
-					botmaid.Word{
+				message += random.WordSlice{
+					random.Word{
 						Word:   "",
 						Weight: 57,
 					},
-					botmaid.Word{
+					random.Word{
 						Word:   "(๑•̀ㅂ•́)✧",
 						Weight: 1,
 					},
-					botmaid.Word{
+					random.Word{
 						Word:   "qwq",
 						Weight: 1,
 					},
-					botmaid.Word{
+					random.Word{
 						Word:   "(✪ω✪)",
 						Weight: 1,
 					},
 				}.Random()
 			}
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: message,
 				},
@@ -303,13 +303,13 @@ func init() {
 					User:   u.User,
 					Result: result,
 				})
-				pkResp(u, b)
+				pkResp(u)
 			}
 			if _, ok := scMap[u.Chat.ID]; ok {
 				log.Println(scMap[u.Chat.ID][u.User.ID])
 				if _, ok := scMap[u.Chat.ID][u.User.ID]; ok && scMap[u.Chat.ID][u.User.ID].Status && n > 0 && n < 100 {
 					scMap[u.Chat.ID][u.User.ID].Result = result
-					scResp(u, b)
+					scResp(u)
 				}
 			}
 			return true
@@ -320,8 +320,8 @@ func init() {
 		Help:     " <说明（可省略）> <表达式（可省略）> - 进行一次表达式计算/检定",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
-			send(b, botmaid.Update{
+		Do: func(u *botmaid.Update) bool {
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, "随机结果", u.Message.Args[random.Int(1, len(u.Message.Args)-1)]),
 				},
@@ -334,13 +334,13 @@ func init() {
 		Help:  " <列表> - 对列表进行随机抽取",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update, b *botmaid.Bot) bool {
+		Do: func(u *botmaid.Update) bool {
 			instruction := ""
 			exp := ""
-			if b.IsCommand(u, []string{"ww"}) && len(u.Message.Args) == 2 {
+			if botmaid.IsCommand(u, []string{"ww"}) && len(u.Message.Args) == 2 {
 				exp = u.Message.Args[1]
 			}
-			if b.IsCommand(u, []string{"ww"}) && len(u.Message.Args) == 3 {
+			if botmaid.IsCommand(u, []string{"ww"}) && len(u.Message.Args) == 3 {
 				instruction = u.Message.Args[1]
 				exp = u.Message.Args[2]
 			}
@@ -420,7 +420,7 @@ func init() {
 				message += " + " + strconv.Itoa(plus) + " = " + strconv.Itoa(ans) + " + " + strconv.Itoa(plus)
 			}
 			message += " = " + strconv.Itoa(ans+plus)
-			send(b, botmaid.Update{
+			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, instruction+"检定结果", message),
 				},
