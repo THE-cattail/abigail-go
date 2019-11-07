@@ -14,7 +14,7 @@ import (
 
 var (
 	formatRoll = []string{
-		"%s的%s是——%v！",
+		"%v的%v是——%v！",
 	}
 
 	hide = map[int64]bool{}
@@ -27,7 +27,7 @@ func init() {
 				send(&botmaid.Update{
 					Message: &botmaid.Message{
 						Text: fmt.Sprintf(random.String([]string{
-							"%s，汝已陷入了临时疯狂：\n",
+							"%v，汝已陷入了临时疯狂：\n",
 						}), u.User.NickName) + coc.RollMadSummary(),
 					},
 					Chat: u.Chat,
@@ -47,7 +47,7 @@ func init() {
 			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String([]string{
-						"%s，汝已陷入了临时疯狂：\n",
+						"%v，汝已陷入了临时疯狂：\n",
 					}), u.User.NickName) + coc.RollMad(),
 				},
 				Chat: u.Chat,
@@ -101,8 +101,8 @@ func init() {
 			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String([]string{
-						"这就是%s新的调查员哦。\n",
-						"%s家新来的调查员？不过如此，呵呵呵。\n",
+						"这就是%v新的调查员哦。\n",
+						"%v家新来的调查员？不过如此，呵呵呵。\n",
 					}), u.User.NickName) + message,
 				},
 				Chat: u.Chat,

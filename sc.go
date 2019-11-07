@@ -64,7 +64,7 @@ func init() {
 					Weight: 1,
 				},
 			}.Random() + fmt.Sprintf(random.String([]string{
-				"%s，请进行一次意志检定。",
+				"%v，请进行一次意志检定。",
 			}), u.User.NickName)
 			send(&botmaid.Update{
 				Message: &botmaid.Message{
@@ -98,7 +98,7 @@ func scResp(u *botmaid.Update) {
 		res = eb.Result.Value
 	}
 	message := fmt.Sprintf(random.String([]string{
-		"%s，汝的理智损失了 %d 点。",
+		"%v，汝的理智损失了 %v 点。",
 	}), u.User.NickName, res)
 	scMap[u.Chat.ID][u.User.ID] = &scType{
 		Status: false,

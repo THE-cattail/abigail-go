@@ -94,6 +94,7 @@ func NewCharacter() Character {
 	*/
 
 	//c.Appearance = charAppearance[d1] + " " + charAppearance[d2] + " " + charAppearance[d3]
+
 	c.Thought = random.String([]string{
 		"你信仰并祈并一位大能。（选择一位大能）",
 		"你认为人类无需上帝。（无神论者或人文学家等）",
@@ -106,6 +107,7 @@ func NewCharacter() Character {
 		"你的名言是“金钱就是力量，我的朋友，我将竭尽全力获取我能看到的一切。”",
 		"你是一名激进主义者。（选择一种激进主义）",
 	})
+
 	c.Person = random.String([]string{
 		"父母辈。（选择父亲、母亲、继父或继母）",
 		"祖父母辈。（选择祖父、祖母、外祖父或外祖母等）",
@@ -118,6 +120,7 @@ func NewCharacter() Character {
 		"另一名调查员。（选择一名调查员）",
 		"一位 NPC。（向 KP 询问并选择一位 NPC）",
 	})
+
 	c.Reason = random.String([]string{
 		"你欠了 TA 人情。（选择一个场景）",
 		"TA 教会了你一些东西。（选择学会的内容）",
@@ -130,6 +133,7 @@ func NewCharacter() Character {
 		"你试图证明你比 TA 更出色。（选择 TA 的缺点）",
 		"TA 扰乱了你的人生，而你寻求复仇。（选择一个场景）",
 	})
+
 	c.Place = random.String([]string{
 		"你最爱的学府。（选择一所学校）",
 		"你的故乡。（选择一处地方）",
@@ -142,6 +146,7 @@ func NewCharacter() Character {
 		"生命中最高兴时的所在。（选择一处地方）",
 		"工作地点。（选择一处地方）",
 	})
+
 	c.Treasure = random.String([]string{
 		"与你得意技相关之物。（选择一件物品）",
 		"职业必需品。（选择一件物品）",
@@ -154,6 +159,7 @@ func NewCharacter() Character {
 		"武器。（选择一件物品）",
 		"宠物。（选择一件物品）",
 	})
+
 	c.Feature = random.String([]string{
 		"慷慨大方的人。",
 		"善待动物的人。",
