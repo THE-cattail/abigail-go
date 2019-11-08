@@ -68,8 +68,8 @@ func calculate(x int, operator rune, y int) (int, error) {
 		}
 		return x % y, nil
 	} else if operator == 'd' {
-		if x > 100 {
-			return 0, errors.New("Too many times")
+		if x > 1000000 {
+			return 0, errors.New("The number of times is over 1000000")
 		}
 		ret := 0
 		for i := 0; i < x; i++ {

@@ -14,8 +14,6 @@ type pkRollResult struct {
 }
 
 type pkType struct {
-	Status bool
-
 	Results []pkRollResult
 }
 
@@ -26,9 +24,7 @@ var (
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			pkMap[u.Chat.ID] = &pkType{
-				Status: true,
-			}
+			pkMap[u.Chat.ID] = &pkType{}
 
 			reply(u, "进行对抗检定，请其中一方掷骰。")
 			return true

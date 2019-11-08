@@ -10,8 +10,6 @@ import (
 )
 
 type callType struct {
-	Status bool
-
 	List, Resped []int64
 
 	Sponsor *botmaid.User
@@ -84,7 +82,6 @@ func init() {
 
 			if len(f.Args()) > 1 {
 				callMap[u.Chat.ID] = &callType{
-					Status: true,
 					List:   []int64{},
 					Resped: []int64{},
 				}
@@ -118,5 +115,4 @@ func init() {
 			},
 		},
 	})
-
 }

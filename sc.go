@@ -8,105 +8,101 @@ import (
 	"github.com/catsworld/abigail/nyamath"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
+	"github.com/spf13/pflag"
 )
 
 type scType struct {
-	Status bool
 	a, b   string
 	Result coc.CheckResult
 }
 
 var (
-	scMap = map[int64]map[int64]*scType{}
+	fmtInvalidSCExp = "%v，”%v“是不合法的 SAN Check 表达式，请查阅规则书中的相关条目。"
+	scMap           = map[int64]map[int64]*scType{}
 )
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			if scMap[u.Chat.ID] == nil {
-				scMap[u.Chat.ID] = map[int64]*scType{}
-			}
-			scMap[u.Chat.ID][u.User.ID] = nil
-			now := 0
-			for i, v := range f.Args()[1] {
-				if v == '(' {
-					now++
+			if len(f.Args()) == 2 {
+				if scMap[u.Chat.ID] == nil {
+					scMap[u.Chat.ID] = map[int64]*scType{}
 				}
-				if v == ')' {
-					now--
-				}
-				if v == '/' && now == 0 {
-					scMap[u.Chat.ID][u.User.ID] = &scType{
-						Status: true,
-						a:      f.Args()[1][0:i],
-						b:      f.Args()[1][i+1 : len(f.Args()[1])],
+
+				now := 0
+				for i, v := range f.Args()[1] {
+					if v == '(' {
+						now++
+					}
+					if v == ')' {
+						now--
+					}
+
+					if v == '/' && now == 0 {
+						if scMap[u.Chat.ID][u.User.ID] != nil {
+							reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+							return true
+						}
+
+						scMap[u.Chat.ID][u.User.ID] = &scType{
+							a: f.Args()[1][0:i],
+							b: f.Args()[1][i+1 : len(f.Args()[1])],
+						}
 					}
 				}
+
+				if scMap[u.Chat.ID][u.User.ID] == nil {
+					reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+					return true
+				}
+
+				_, err := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
+				if err != nil {
+					reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+					return true
+				}
+
+				_, err = nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
+				if err != nil {
+					reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+					return true
+				}
+
+				reply(u, fmt.Sprintf("%v，请进行一次意志检定。", botmaid.At(u.User)))
+				return true
 			}
-			if scMap[u.Chat.ID][u.User.ID] == nil {
-				return false
-			}
-			_, err := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
-			if err != nil {
-				return false
-			}
-			_, err = nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
-			if err != nil {
-				return false
-			}
-			message := random.WordSlice{
-				random.Word{
-					Word:   "",
-					Weight: 99,
-				},
-				random.Word{
-					Word:   "你将会遇见一只小阿比(*^▽^*)~\n",
-					Weight: 1,
-				},
-			}.Random() + fmt.Sprintf(random.String([]string{
-				"%v，请进行一次意志检定。",
-			}), u.User.NickName)
-			send(&botmaid.Update{
-				Message: &botmaid.Message{
-					Text: message,
-				},
-				Chat: u.Chat,
-			}, false, u)
-			return true
+
+			return false
 		},
-		Menu:       "sc",
-		MenuText:   "SAN check",
-		Names:      []string{"sc", "sancheck"},
-		ArgsMinLen: 2,
-		ArgsMaxLen: 2,
-		Help:       " <SAN check公式> - 进行一次SAN check",
+		Help: &botmaid.Help{
+			Menu:  "sc",
+			Help:  "SAN check 功能",
+			Names: []string{"sc"},
+			Full: `使用方法：sc SANCheck表达式
+
+%v`,
+		},
 	})
 }
 
 func scResp(u *botmaid.Update) {
-	time.Sleep(time.Second * 2)
-	ea, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
-	eb, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
-	res := 0
+	time.Sleep(time.Second * time.Duration(random.Int(1, 3)))
+
+	a, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
+	b, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
+
+	r := 0
+
 	if scMap[u.Chat.ID][u.User.ID].Result.Great == coc.GreatSucc {
-		res = ea.Result.Min
+		r = a.Result.Min
 	} else if scMap[u.Chat.ID][u.User.ID].Result.Great == coc.GreatFail {
-		res = eb.Result.Max
+		r = b.Result.Max
 	} else if scMap[u.Chat.ID][u.User.ID].Result.Succ == coc.Succ {
-		res = ea.Result.Value
+		r = a.Result.Value
 	} else {
-		res = eb.Result.Value
+		r = b.Result.Value
 	}
-	message := fmt.Sprintf(random.String([]string{
-		"%v，汝的理智损失了 %v 点。",
-	}), u.User.NickName, res)
-	scMap[u.Chat.ID][u.User.ID] = &scType{
-		Status: false,
-	}
-	send(&botmaid.Update{
-		Message: &botmaid.Message{
-			Text: message,
-		},
-		Chat: u.Chat,
-	}, false, u)
+
+	scMap[u.Chat.ID][u.User.ID] = nil
+	reply(u, fmt.Sprintf("%v的理智损失了 %v 点。", botmaid.At(u.User), r))
 }

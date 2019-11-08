@@ -25,6 +25,7 @@ func main() {
 
 func reply(u *botmaid.Update, text string) (*botmaid.Update, error) {
 	hide, _ := bm.Flags["roll"].GetBool("hide")
+
 	if hide {
 		botmaid.Reply(u, fmt.Sprintf("%v进行了一次暗骰。", botmaid.At(u.User)))
 
