@@ -6,30 +6,29 @@ import (
 
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
+	"github.com/spf13/pflag"
 )
 
 func init() {
-	bm.AddTimer(botmaid.Timer{
-		Do: func() {
-			bm.Redis.Del("jrrp")
-		},
-		Start:     time.Date(2019, 10, 6, 0, 0, 0, 0, loc),
-		Frequency: time.Hour * 24,
-	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
-			rp := ""
-			can := ""
-			cannot := ""
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
+			time := time.Now().Format("20060102")
+			if time != bm.Redis.HGet("jrrp", "time").Val() {
+				bm.Redis.Del("jrrp")
+			}
+			bm.Redis.HSet("jrrp", "time", time)
 
-			if bm.Redis.HExists("jrrp", fmt.Sprintf("%v_%v_rp", u.Bot.ID, u.User.ID)).Val() {
-				rp = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_rp", u.Bot.ID, u.User.ID)).Val()
-				can = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_can", u.Bot.ID, u.User.ID)).Val()
-				cannot = bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v_cannot", u.Bot.ID, u.User.ID)).Val()
-			} else {
-				rp = fmt.Sprintf("%v", random.Int(1, 100))
+			if bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val() != "" {
+				botmaid.Reply(u, u.User.NickName+bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val())
+				return true
+			}
 
-				jrrpSkill := []string{
+			jrrpEvent := []string{
+				"会计",
+				"人类学",
+				"估价",
+				"考古学",
+				"技艺：" + random.String([]string{
 					"表演",
 					"美术",
 					"摄影",
@@ -47,8 +46,19 @@ func init() {
 					"粉刷/油漆工",
 					"制陶",
 					"雕塑",
-				}
-				jrrpFighting := []string{
+				}),
+				"魅惑",
+				"攀爬",
+				"计算机使用",
+				"信用评级",
+				"克苏鲁神话",
+				"乔装",
+				"闪避",
+				"汽车驾驶",
+				"电气维修",
+				"电子学",
+				"话术",
+				"格斗：" + random.String([]string{
 					"鞭子",
 					"电锯",
 					"斗殴",
@@ -57,8 +67,8 @@ func init() {
 					"绞索",
 					"链枷",
 					"矛",
-				}
-				jrrpShooting := []string{
+				}),
+				"射击：" + random.String([]string{
 					"步枪/霰弹枪",
 					"冲锋枪",
 					"弓",
@@ -66,8 +76,30 @@ func init() {
 					"机枪",
 					"手枪",
 					"重武器",
-				}
-				jrrpScience := []string{
+				}),
+				"急救",
+				"历史",
+				"恐吓",
+				"跳跃",
+				"语言：外语",
+				"母语",
+				"法律",
+				"图书馆使用",
+				"聆听",
+				"锁匠",
+				"机械维修",
+				"医学",
+				"博物学",
+				"领航",
+				"神秘学",
+				"操作重型机械",
+				"说服",
+				"驾驶：飞行器",
+				"驾驶：船",
+				"精神分析",
+				"心理学",
+				"骑术",
+				"科学：" + random.String([]string{
 					"地质学",
 					"化学",
 					"生物学",
@@ -81,13 +113,25 @@ func init() {
 					"工程学",
 					"气象学",
 					"司法科学",
-				}
-				jrrpSurvive := []string{
+				}),
+				"妙手",
+				"侦察",
+				"潜行",
+				"生存：" + random.String([]string{
 					"狩猎知识",
 					"搭建住所",
 					"危险意识",
-				}
-				jrrpCheckAndPK := []string{
+				}),
+				"游泳",
+				"投掷",
+				"追踪",
+				"潜水",
+				"爆破",
+				"催眠",
+				"读唇",
+				"炮术",
+				"驯兽",
+				random.String([]string{
 					"力量检定",
 					"力量对抗",
 					"敏捷检定",
@@ -99,8 +143,11 @@ func init() {
 					"意志对抗",
 					"教育检定",
 					"幸运检定",
-				}
-				jrrpSpell := []string{
+				}),
+				"阅读神话典籍",
+				"战斗",
+				"追逐",
+				"法术：" + random.String([]string{
 					"灵魂分配术",
 					"耶德·艾塔德放逐术",
 					"束缚术",
@@ -207,8 +254,9 @@ func init() {
 					"肢体凋萎术",
 					"真言术",
 					"折磨术",
-				}
-				jrrpTRPG := []string{
+				}),
+				"孤注一掷",
+				random.String([]string{
 					"守序善良",
 					"中立善良",
 					"混乱善良",
@@ -218,102 +266,30 @@ func init() {
 					"守序邪恶",
 					"中立邪恶",
 					"混乱邪恶",
-				}
-
-				jrrpEvent := []string{
-					"会计",
-					"人类学",
-					"估价",
-					"考古学",
-					"技艺：" + random.String(jrrpSkill),
-					"魅惑",
-					"攀爬",
-					"计算机使用",
-					"信用评级",
-					"克苏鲁神话",
-					"乔装",
-					"闪避",
-					"汽车驾驶",
-					"电气维修",
-					"电子学",
-					"话术",
-					"格斗：" + random.String(jrrpFighting),
-					"射击：" + random.String(jrrpShooting),
-					"急救",
-					"历史",
-					"恐吓",
-					"跳跃",
-					"语言：外语",
-					"母语",
-					"法律",
-					"图书馆使用",
-					"聆听",
-					"锁匠",
-					"机械维修",
-					"医学",
-					"博物学",
-					"领航",
-					"神秘学",
-					"操作重型机械",
-					"说服",
-					"驾驶：飞行器",
-					"驾驶：船",
-					"精神分析",
-					"心理学",
-					"骑术",
-					"科学：" + random.String(jrrpScience),
-					"妙手",
-					"侦察",
-					"潜行",
-					"生存：" + random.String(jrrpSurvive),
-					"游泳",
-					"投掷",
-					"追踪",
-					"潜水",
-					"爆破",
-					"催眠",
-					"读唇",
-					"炮术",
-					"驯兽",
-					random.String(jrrpCheckAndPK),
-					"阅读神话典籍",
-					"战斗",
-					"追逐",
-					"法术：" + random.String(jrrpSpell),
-					"孤注一掷",
-					random.String(jrrpTRPG) + "跑团",
-					"SAN check",
-					"调戏小阿比",
-				}
-
-				can = random.String(jrrpEvent)
-				cannot = random.String(jrrpEvent)
-				for can == cannot {
-					cannot = random.String(jrrpEvent)
-				}
-
-				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_rp", u.Bot.ID, u.User.ID), rp)
-				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_can", u.Bot.ID, u.User.ID), can)
-				bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v_cannot", u.Bot.ID, u.User.ID), cannot)
+				}) + "跑团",
+				"SAN check",
+				"调戏小阿比",
 			}
 
-			botmaid.Reply(u, fmt.Sprintf((random.WordSlice{
-				random.Word{
-					Word:   "%v今日的人品值是——%v，宜%v，忌%v",
-					Weight: 49,
-				},
-				random.Word{
-					Word:   "%v今天有%v点人品，宜%v，忌%v，可不要把人品值用光了哦XD",
-					Weight: 1,
-				},
-			}.Random()), u.User.NickName, rp, can, cannot))
+			can := random.String(jrrpEvent)
+			cannot := random.String(jrrpEvent)
+			for can == cannot {
+				cannot = random.String(jrrpEvent)
+			}
+
+			s := fmt.Sprintf("今日的人品值是——%v，宜%v，忌%v", random.Int(1, 100), can, cannot)
+
+			bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID), s)
+			botmaid.Reply(u, u.User.NickName+s)
 			return true
 		},
-		Menu:       "jrrp",
-		MenuText:   "今日人品",
-		Names:      []string{"jrrp"},
-		ArgsMinLen: 1,
-		ArgsMaxLen: 1,
-		Help:       " - 占卜今日人品",
+		Help: &botmaid.Help{
+			Menu:  "jrrp",
+			Help:  "今日人品功能",
+			Names: []string{"jrrp"},
+			Full: `使用方法：jrrp
+
+%v`,
+		},
 	})
 }

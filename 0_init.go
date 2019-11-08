@@ -20,6 +20,17 @@ func init() {
 	}
 
 	bm.Words["selfIntro"] = []string{
-		fmt.Sprintf("你好！我是阿比盖尔——阿比盖尔·威廉姆斯。我是For……eigner……%%v，如果不介意的话，叫我阿比吧。我们应该很快就能成为朋友。要叫出我的话，在命令前敲上%v就可以啦。", botmaid.ListToString(bm.Conf.CommandPrefix, "“%v”", "、", "或者")),
+		fmt.Sprintf(`你好！我是%%v——阿比盖尔·威廉姆斯。我是For……eigner……，如果不介意的话，叫我阿比吧。我们应该很快就能成为朋友。
+
+使用方法：
+
+%v（%v）*命令* [参数]
+		
+命令目录：
+%%v
+		
+使用 ”help [命令]“ 来获得关于单条命令的更多信息。
+
+本程序按照《Call of Cthulhu 7th》秋叶EXODUS翻译版 Version1902 编写`, bm.Conf.CommandPrefix[0], botmaid.ListToString(bm.Conf.CommandPrefix[1:], "“%v”", "、", "或者")),
 	}
 }

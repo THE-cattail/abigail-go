@@ -5,7 +5,7 @@ import (
 
 	"github.com/catsworld/abigail/coc"
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/botmaid/random"
+	"github.com/spf13/pflag"
 )
 
 type pkRollResult struct {
@@ -14,7 +14,8 @@ type pkRollResult struct {
 }
 
 type pkType struct {
-	Status  bool
+	Status bool
+
 	Results []pkRollResult
 }
 
@@ -24,68 +25,48 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			pkMap[u.Chat.ID] = &pkType{
 				Status: true,
 			}
-			send(&botmaid.Update{
-				Message: &botmaid.Message{
-					Text: random.String([]string{
-						"开始对抗，请一方 roll 点。",
-						"对抗检定~请其中一边先 roll 点~",
-					}),
-				},
-				Chat: u.Chat,
-			}, false, u)
+
+			reply(u, "进行对抗检定，请其中一方掷骰。")
 			return true
 		},
-		Menu:     "pk",
-		MenuText: "对抗检定",
-		Names:    []string{"pk"},
-		Help:     " - 进行一次对抗",
+		Help: &botmaid.Help{
+			Menu:  "pk",
+			Help:  "对抗检定功能",
+			Names: []string{"pk"},
+			Full: `使用方法：pk
+
+%v`,
+		},
 	})
 }
 
 func pkResp(u *botmaid.Update) {
-	if _, ok := pkMap[u.Chat.ID]; !ok || !pkMap[u.Chat.ID].Status {
+	if pkMap[u.Chat.ID] == nil {
 		return
 	}
+
 	if len(pkMap[u.Chat.ID].Results) == 1 {
-		send(&botmaid.Update{
-			Message: &botmaid.Message{
-				Text: random.String([]string{
-					"请另一方 roll 点。",
-					"接下来请另一边 roll 点~",
-				}),
-			},
-			Chat: u.Chat,
-		}, false, u)
+		reply(u, "请另一方掷骰。")
 		return
 	}
-	pkResult := coc.PK(pkMap[u.Chat.ID].Results[0].Result, pkMap[u.Chat.ID].Results[1].Result)
-	message := ""
-	if pkResult == coc.PKDraw {
-		message = random.String([]string{
-			"对抗结果：平局！",
-			"这次对抗平局了哦~",
-		})
-	} else {
-		victor := pkMap[u.Chat.ID].Results[0].User.NickName
-		if pkResult == coc.PKBWin {
-			victor = pkMap[u.Chat.ID].Results[1].User.NickName
-		}
-		message = fmt.Sprintf(random.String([]string{
-			"对抗结果：%v胜利！",
-			"这次对抗由%v取得了胜利~",
-		}), victor)
+
+	pkMap[u.Chat.ID] = nil
+
+	r := coc.PK(pkMap[u.Chat.ID].Results[0].Result, pkMap[u.Chat.ID].Results[1].Result)
+
+	if r == coc.PKDraw {
+		reply(u, "对抗检定的结果为平局。")
+		return
 	}
-	pkMap[u.Chat.ID] = &pkType{
-		Status: false,
+
+	v := botmaid.At(pkMap[u.Chat.ID].Results[0].User)
+	if r == coc.PKBWin {
+		v = botmaid.At(pkMap[u.Chat.ID].Results[1].User)
 	}
-	send(&botmaid.Update{
-		Message: &botmaid.Message{
-			Text: message,
-		},
-		Chat: u.Chat,
-	}, false, u)
+
+	reply(u, fmt.Sprintf("对抗检定的结果为%v胜利。", v))
 }

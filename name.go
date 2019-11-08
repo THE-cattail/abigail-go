@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/catsworld/botmaid"
+	"github.com/spf13/pflag"
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/goroom/rand"
@@ -10,28 +11,36 @@ import (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
-			p := "cn"
-			if len(u.Message.Args) > 1 {
-				p = u.Message.Args[1]
-			}
-			if botmaid.In(p, "cn", "中", "中文") {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
+			lang, _ := f.GetString("lang")
+
+			if botmaid.In(lang, "cn", "中", "中文") {
 				botmaid.Reply(u, rand.GetRand().ChineseName())
-			} else if botmaid.In(p, "en", "英", "英文") {
-				botmaid.Reply(u, randomdata.FullName(randomdata.RandomGender))
-			} else if botmaid.In(p, "jp", "日", "日文") {
-				name := gimei.NewName()
-				botmaid.Reply(u, name.Kanji())
-			} else {
-				return false
+				return true
 			}
-			return true
+
+			if botmaid.In(lang, "en", "英", "英文") {
+				botmaid.Reply(u, randomdata.FullName(randomdata.RandomGender))
+				return true
+			}
+
+			if botmaid.In(lang, "jp", "日", "日文") {
+				botmaid.Reply(u, gimei.NewName().Kanji())
+				return true
+			}
+
+			return false
 		},
-		Menu:       "name",
-		MenuText:   "随机名字",
-		Names:      []string{"name"},
-		ArgsMinLen: 1,
-		ArgsMaxLen: 2,
-		Help:       " <cn/en/jp> - 生成一个随机名字",
+		Help: &botmaid.Help{
+			Menu:  "name",
+			Help:  "随机生成角色姓名",
+			Names: []string{"name"},
+			Full: `使用方法：name [选项]
+
+%v`,
+			SetFlag: func(f *pflag.FlagSet) {
+				f.String("lang", "cn", "指定生成姓名的语言")
+			},
+		},
 	})
 }

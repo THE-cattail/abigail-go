@@ -3,11 +3,12 @@ package main
 import (
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
+	"github.com/spf13/pflag"
 )
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			botmaid.Reply(u, random.String([]string{
 				"What has risen may sink, and what is sunk may rise… Cthulhu still lives\n（升起的或许会沉没，而沉没的也将会升起……克苏鲁永在。）",
 				"人类无法将脑内所有信息同时关联到一起，我想，这算是世间最大的仁慈了。我们身处恬然宁静的无知之岛，位于黑狞无边的大海中央，也并非注定要驶向远方一探究竟。各种科学在其所属方向竭力前行，虽然至今尚未对我们造成伤害，但终有一天，各不相关的知识彼此碰撞，会揭开那骇人的真相，点明我们在这片可怕光景中所处的方位。这份光明是如此恐怖而致命，我们若不想失心而疯，就必须远远逃开，躲进一个新的黑暗时代去寻找平和与安宁。",
@@ -87,11 +88,13 @@ func init() {
 			}))
 			return true
 		},
-		Menu:       "ping",
-		MenuText:   "Pong!",
-		Names:      []string{"ping"},
-		ArgsMinLen: 1,
-		ArgsMaxLen: 1,
-		Help:       " - Pong!",
+		Help: &botmaid.Help{
+			Menu:  "ping",
+			Help:  "显示随机洛夫克拉夫特语录",
+			Names: []string{"ping"},
+			Full: `使用方法：ping
+
+%v`,
+		},
 	})
 }

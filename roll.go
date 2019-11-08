@@ -10,20 +10,20 @@ import (
 	"github.com/catsworld/abigail/nyamath"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
+	"github.com/spf13/pflag"
 )
 
 var (
 	formatRoll = []string{
 		"%v的%v是——%v！",
 	}
-
-	hide = map[int64]bool{}
 )
 
+// TODO: hide argument in roll
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
-			if botmaid.In(u.Message.Args[1], "summary", "sum") {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
+			if botmaid.In(f.Args()[1], "summary", "sum") {
 				send(&botmaid.Update{
 					Message: &botmaid.Message{
 						Text: fmt.Sprintf(random.String([]string{
@@ -43,7 +43,7 @@ func init() {
 		Help:       " summary - roll 一次疯狂的总结症状",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			send(&botmaid.Update{
 				Message: &botmaid.Message{
 					Text: fmt.Sprintf(random.String([]string{
@@ -61,7 +61,7 @@ func init() {
 		Help:       " - roll 一次疯狂的即时症状",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			c := coc.NewCharacter()
 			message := random.String([]string{
 				"这是你的属性：",
@@ -75,7 +75,7 @@ func init() {
 			message += "体型" + strconv.Itoa(c.SIZ) + " "
 			message += "智力" + strconv.Itoa(c.INT) + " "
 			message += "幸运" + strconv.Itoa(c.Luck)
-			if len(u.Message.Args) > 1 && botmaid.In(u.Message.Args[1], "full") {
+			if len(f.Args()) > 1 && botmaid.In(f.Args()[1], "full") {
 				message += "\n"
 				/*
 					message += random.String([]string{
@@ -116,8 +116,8 @@ func init() {
 		Help:       " (full) - roll一张人物卡",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
-			if botmaid.In(u.Message.Args[1], "hide") {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
+			if botmaid.In(f.Args()[1], "hide") {
 				hide[u.ID] = true
 				u.Message.Text = strings.Replace(u.Message.Text, "hide", "", 1)
 			}
@@ -128,15 +128,15 @@ func init() {
 		Help:       " hide - 进行一次暗骰",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			instruction := ""
 			exp := ""
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
-				exp = u.Message.Args[1]
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 2 {
+				exp = f.Args()[1]
 			}
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
-				instruction = u.Message.Args[1]
-				exp = u.Message.Args[2]
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 3 {
+				instruction = f.Args()[1]
+				exp = f.Args()[2]
 			}
 			if !strings.Contains(exp, "d") {
 				return false
@@ -185,15 +185,15 @@ func init() {
 		},
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			instruction := "计算结果"
 			exp := ""
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
-				exp = u.Message.Args[1]
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 2 {
+				exp = f.Args()[1]
 			}
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
-				instruction = u.Message.Args[1]
-				exp = u.Message.Args[2]
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 3 {
+				instruction = f.Args()[1]
+				exp = f.Args()[2]
 			}
 			if exp == "" {
 				return false
@@ -216,24 +216,24 @@ func init() {
 		},
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			instruction := ""
 			num := ""
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 1 {
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 1 {
 				num = "0"
 			}
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 2 {
-				_, err := strconv.Atoi(u.Message.Args[1])
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 2 {
+				_, err := strconv.Atoi(f.Args()[1])
 				if err != nil {
-					instruction = u.Message.Args[1]
+					instruction = f.Args()[1]
 					num = "0"
 				} else {
-					num = u.Message.Args[1]
+					num = f.Args()[1]
 				}
 			}
-			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(u.Message.Args) == 3 {
-				instruction = u.Message.Args[1]
-				num = u.Message.Args[2]
+			if botmaid.IsCommand(u, []string{"roll", "r"}) && len(f.Args()) == 3 {
+				instruction = f.Args()[1]
+				num = f.Args()[2]
 			}
 			n, err := strconv.Atoi(num)
 			if err != nil {
@@ -320,10 +320,10 @@ func init() {
 		Help:     " <说明（可省略）> <表达式（可省略）> - 进行一次表达式计算/检定",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			send(&botmaid.Update{
 				Message: &botmaid.Message{
-					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, "随机结果", u.Message.Args[random.Int(1, len(u.Message.Args)-1)]),
+					Text: fmt.Sprintf(random.String(formatRoll), u.User.NickName, "随机结果", f.Args()[random.Int(1, len(f.Args())-1)]),
 				},
 				Chat: u.Chat,
 			}, hide[u.ID], u)
@@ -334,15 +334,15 @@ func init() {
 		Help:  " <列表> - 对列表进行随机抽取",
 	})
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			instruction := ""
 			exp := ""
-			if botmaid.IsCommand(u, []string{"ww"}) && len(u.Message.Args) == 2 {
-				exp = u.Message.Args[1]
+			if botmaid.IsCommand(u, []string{"ww"}) && len(f.Args()) == 2 {
+				exp = f.Args()[1]
 			}
-			if botmaid.IsCommand(u, []string{"ww"}) && len(u.Message.Args) == 3 {
-				instruction = u.Message.Args[1]
-				exp = u.Message.Args[2]
+			if botmaid.IsCommand(u, []string{"ww"}) && len(f.Args()) == 3 {
+				instruction = f.Args()[1]
+				exp = f.Args()[2]
 			}
 			plus := 0
 			a := 10

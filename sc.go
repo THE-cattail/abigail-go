@@ -22,13 +22,13 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			if scMap[u.Chat.ID] == nil {
 				scMap[u.Chat.ID] = map[int64]*scType{}
 			}
 			scMap[u.Chat.ID][u.User.ID] = nil
 			now := 0
-			for i, v := range u.Message.Args[1] {
+			for i, v := range f.Args()[1] {
 				if v == '(' {
 					now++
 				}
@@ -38,8 +38,8 @@ func init() {
 				if v == '/' && now == 0 {
 					scMap[u.Chat.ID][u.User.ID] = &scType{
 						Status: true,
-						a:      u.Message.Args[1][0:i],
-						b:      u.Message.Args[1][i+1 : len(u.Message.Args[1])],
+						a:      f.Args()[1][0:i],
+						b:      f.Args()[1][i+1 : len(f.Args()[1])],
 					}
 				}
 			}

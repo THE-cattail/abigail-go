@@ -23,14 +23,19 @@ func main() {
 	}
 }
 
-func send(u *botmaid.Update, hide bool, origin *botmaid.Update) (*botmaid.Update, error) {
+func reply(u *botmaid.Update, text string) (*botmaid.Update, error) {
+	hide, _ := bm.Flags["roll"].GetBool("hide")
 	if hide {
-		botmaid.Reply(u, fmt.Sprintf("%v进行了一次暗骰。", botmaid.At(origin.User)))
-		u.Message.Text = "[暗骰] " + u.Message.Text
-		u.Chat = &botmaid.Chat{
-			ID:   origin.User.ID,
+		botmaid.Reply(u, fmt.Sprintf("%v进行了一次暗骰。", botmaid.At(u.User)))
+
+		uu := &(*u)
+		uu.Chat = &botmaid.Chat{
+			ID:   u.User.ID,
 			Type: "private",
 		}
+
+		return botmaid.Reply(u, "[暗骰] "+text)
 	}
-	return (*origin.Bot.API).Push(u)
+
+	return botmaid.Reply(u, text)
 }

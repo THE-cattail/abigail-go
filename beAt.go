@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -11,7 +12,7 @@ var (
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			if bm.BeAt(u) && bm.IsMaster(u.User) {
 				botmaid.Reply(u, random.String([]string{
 					"多给我一些，多到满溢……",
@@ -47,7 +48,7 @@ func init() {
 	})
 
 	bm.AddCommand(&botmaid.Command{
-		Do: func(u *botmaid.Update) bool {
+		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			if bm.BeAt(u) {
 				botmaid.Reply(u, random.String([]string{
 					"真是个坏孩子……",
