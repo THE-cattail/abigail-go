@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/botmaid/random"
 
 	_ "github.com/lib/pq"
 )
@@ -26,12 +25,7 @@ func main() {
 
 func send(u *botmaid.Update, hide bool, origin *botmaid.Update) (*botmaid.Update, error) {
 	if hide {
-		botmaid.Reply(u, fmt.Sprintf(random.String([]string{
-			"%v的暗骰。",
-			"%v进行了一次暗骰。",
-			"%v开始暗骰了，没人知道到底发生了什么~",
-			"%v正在瞎编……",
-		}), origin.User.NickName))
+		botmaid.Reply(u, fmt.Sprintf("%v进行了一次暗骰。", botmaid.At(origin.User)))
 		u.Message.Text = "[暗骰] " + u.Message.Text
 		u.Chat = &botmaid.Chat{
 			ID:   origin.User.ID,

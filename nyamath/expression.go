@@ -3,6 +3,7 @@ package nyamath
 import (
 	"errors"
 	"fmt"
+	"unicode"
 
 	"github.com/catsworld/botmaid/random"
 )
@@ -128,7 +129,7 @@ func (e *Expression) string2Infix(s string) error {
 	nowNumber := 0
 	nowNumberFlag := false
 	for _, v := range s {
-		if IsNumber(v) {
+		if unicode.IsDigit(v) {
 			if len(e.Infix) > 0 {
 				if _, ok := e.Infix[len(e.Infix)-1].(int); ok {
 					return errors.New("Invalid expression")
