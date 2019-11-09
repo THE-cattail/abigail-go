@@ -280,7 +280,7 @@ func init() {
 			s := fmt.Sprintf("今日的人品值是——%v，宜%v，忌%v", random.Int(1, 100), can, cannot)
 
 			bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID), s)
-			botmaid.Reply(u, u.User.NickName+s)
+			botmaid.Reply(u, botmaid.At(u.User)+s)
 			return true
 		},
 		Help: &botmaid.Help{

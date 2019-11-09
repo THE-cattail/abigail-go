@@ -23,10 +23,35 @@ var (
 )
 
 // Check returns the result of a check.
-func Check(n int) CheckResult {
+func Check(n, bp int) CheckResult {
 	result := CheckResult{
 		N:      n,
 		Number: random.Int(1, 100),
+	}
+
+	if bp > 0 {
+		for i := 0; i < bp; i++ {
+			t := random.Int(0, 9)
+			tt := t*10 + result.Number%10
+			if tt == 0 {
+				tt = 100
+			}
+			if tt < result.Number {
+				result.Number = tt
+			}
+		}
+	}
+	if bp < 0 {
+		for i := 0; i > bp; i-- {
+			t := random.Int(0, 9)
+			tt := t*10 + result.Number%10
+			if tt == 0 {
+				tt = 100
+			}
+			if tt > result.Number {
+				result.Number = tt
+			}
+		}
 	}
 
 	if n <= 0 {

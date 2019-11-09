@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -12,25 +13,17 @@ import (
 	"github.com/spf13/pflag"
 )
 
-var (
-	fmtRoll = []string{
-		"%v的%v是——%v！",
-	}
-)
-
-// TODO: hide argument in roll
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			sum, _ := f.GetBool("sum")
 			if sum {
-				reply(u, fmt.Sprintf("%v陷入了临时疯狂，其总结症状为：\n%v", u.User.NickName, coc.RollMadSummary()))
+				reply(u, fmt.Sprintf("%v陷入了临时疯狂，其总结症状为：\n%v", botmaid.At(u.User), coc.RollMadSummary()))
 				return true
 			}
 
-			reply(u, fmt.Sprintf("%v陷入了临时疯狂，其即时症状为：\n%v", u.User.NickName, coc.RollMad()))
-
-			return false
+			reply(u, fmt.Sprintf("%v陷入了临时疯狂，其即时症状为：\n%v", botmaid.At(u.User), coc.RollMad()))
+			return true
 		},
 		Help: &botmaid.Help{
 			Menu:  "mad",
@@ -47,36 +40,56 @@ func init() {
 
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			c := coc.NewCharacter()
-
 			full, _ := f.GetBool("full")
+			num, _ := f.GetInt("num")
+			if full {
+				num = 1
+			}
+			if num > 5 {
+				botmaid.Reply(u, "同时生成的角色卡数量至多为 5。")
+			}
 
+			c := &coc.Character{}
 			s := ""
 
 			if full {
 				s += "属性：\n"
 			}
 
-			s += "力量" + strconv.Itoa(c.STR) + " "
-			s += "敏捷" + strconv.Itoa(c.DEX) + " "
-			s += "意志" + strconv.Itoa(c.POW) + " "
-			s += "体质" + strconv.Itoa(c.CON) + " "
-			s += "外貌" + strconv.Itoa(c.APP) + " "
-			s += "教育" + strconv.Itoa(c.EDU) + " "
-			s += "体型" + strconv.Itoa(c.SIZ) + " "
-			s += "智力" + strconv.Itoa(c.INT) + " "
-			s += "幸运" + strconv.Itoa(c.Luck)
+			for i := 0; i < num; i++ {
+				c = coc.NewCharacter(full)
+
+				if i != 0 {
+					s += "\n"
+				}
+
+				s += "力量" + strconv.Itoa(c.STR) + " "
+				s += "敏捷" + strconv.Itoa(c.DEX) + " "
+				s += "意志" + strconv.Itoa(c.POW) + " "
+				s += "体质" + strconv.Itoa(c.CON) + " "
+				s += "外貌" + strconv.Itoa(c.APP) + " "
+				s += "教育" + strconv.Itoa(c.EDU) + " "
+				s += "体型" + strconv.Itoa(c.SIZ) + " "
+				s += "智力" + strconv.Itoa(c.INT) + " "
+				s += "幸运" + strconv.Itoa(c.Luck)
+			}
 
 			if full {
+				s += fmt.Sprintf("\n调查员姓名：%v 年龄：%v 职业：%v", c.Name, c.Age, c.Class)
+
+				if c.AgeMention != "" {
+					s += "\n（" + c.AgeMention + "）"
+				}
+
 				s += "\n背景：\n"
 				/*
 					s += "你是这样的：" + c.Description + "\n"
 				*/
-				s += c.Thought + "\n"
-				s += "你的重要之人是" + c.Person + "因为" + c.Reason + "\n"
-				s += "你的意义非凡之地是" + c.Place + "\n"
-				s += "你的宝贵之物是" + c.Treasure + "\n"
-				s += "你是一个" + c.Feature
+				s += "该调查员" + c.Thought + "\n"
+				s += "该调查员的重要之人是" + c.Person + "因为" + c.Reason + "\n"
+				s += "该调查员的意义非凡之地是" + c.Place + "\n"
+				s += "该调查员的宝贵之物是" + c.Treasure + "\n"
+				s += "该调查员是一个" + c.Feature
 			}
 
 			botmaid.Reply(u, s)
@@ -90,13 +103,18 @@ func init() {
 
 %v`,
 			SetFlag: func(f *pflag.FlagSet) {
-				f.BoolP("full", "f", false, "生成完整人物背景")
+				f.BoolP("full", "f", false, "生成完整角色背景")
+				f.Int("num", 1, "生成角色卡数量（仅简略生成时可用）")
 			},
 		},
 	})
 
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
+			fmtRoll := []string{
+				"%v的%v是——%v！",
+			}
+
 			w := ""
 			e := ""
 
@@ -117,10 +135,10 @@ func init() {
 			if len(es) == 2 {
 				a, err := strconv.Atoi(es[0])
 				if err == nil && a > 1 {
-					b, err := strconv.Atoi(es[0])
+					b, err := strconv.Atoi(es[1])
 					if err == nil && b > 0 {
-						if a > 1000000 {
-							reply(u, "投掷次数不能超过 1000000。")
+						if a > 256 {
+							reply(u, "投掷次数不能超过 256。")
 							return true
 						}
 
@@ -136,51 +154,67 @@ func init() {
 						}
 						s += ") = " + strconv.Itoa(sum)
 
-						reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"检定结果", s))
+						reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"骰点结果", s))
 						return true
 					}
 				}
 			}
 
-			if w == "" {
-				w = "骰点结果"
-				if len(f.Args()) > 1 {
-					w = "表达式结果"
-				}
-			}
-
 			n, err := strconv.Atoi(e)
-			if err != nil && len(f.Args()) == 2 {
-				w = f.Args()[1] + "检定"
-				e = "1d100"
-			}
-
 			if err != nil || n < 0 {
 				ee, err := nyamath.New(e)
+				if err != nil && len(f.Args()) == 2 {
+					w = f.Args()[1] + "骰点"
+					ee, err = nyamath.New("1d100")
+				} else {
+					if len(es) == 2 {
+						_, err := strconv.Atoi(es[1])
+						if err == nil && es[0] == "1" {
+							w += "骰点"
+						} else {
+							w += "表达式"
+						}
+					} else {
+						w += "表达式"
+					}
+				}
+
 				if err == nil {
-					reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w, ee.Result.Value))
+					reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"结果", ee.Result.Value))
 					return true
 				}
 			} else {
-				if w == "骰点结果" || w == "表达式结果" {
-					w = ""
+				diff, _ := f.GetString("diff")
+				if diff == "h" {
+					n /= 2
+				}
+				if diff == "e" {
+					n /= 5
 				}
 
-				r := coc.Check(n)
+				bonus, _ := f.GetInt("bonus")
+				punish, _ := f.GetInt("punish")
+				bp := bonus - punish
+				if math.Abs(float64(bp)) > 256 {
+					botmaid.Reply(u, "奖罚骰数量差的绝对值不应超过 256。")
+					return true
+				}
+				r := coc.Check(n, bp)
+
 				s := fmt.Sprintf("%v/%v", n, r.Number)
 
 				if r.Great == coc.GreatSucc {
-					s += "。大成功！"
+					s += "，大成功"
 				} else if r.Great == coc.GreatFail {
-					s += "。大失败！"
+					s += "，大失败"
 				} else if r.Level == coc.DiffSucc {
-					s += "，困难成功。"
+					s += "，困难成功"
 				} else if r.Level == coc.ExDiffSucc {
-					s += "，极难成功。"
+					s += "，极难成功"
 				} else if r.Succ == coc.Succ {
-					s += "，检定成功。"
+					s += "，检定成功"
 				} else if r.Succ == coc.Fail {
-					s += "，检定失败。"
+					s += "，检定失败"
 				}
 
 				reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"检定结果", s))
@@ -215,6 +249,9 @@ func init() {
 %v`,
 			SetFlag: func(f *pflag.FlagSet) {
 				f.BoolP("hide", "h", false, "暗骰")
+				f.String("diff", "n", "设置检定的困难程度（普通=n，困难=h，极难=e")
+				f.Int("bonus", 0, "设置奖励骰的数量")
+				f.Int("punish", 0, "设置惩罚骰的数量")
 			},
 		},
 	})

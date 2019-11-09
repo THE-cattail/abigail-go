@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/catsworld/botmaid"
 	"github.com/spf13/pflag"
 
@@ -29,7 +31,8 @@ func init() {
 				return true
 			}
 
-			return false
+			botmaid.Reply(u, fmt.Sprintf("语言“%v”未收录", lang))
+			return true
 		},
 		Help: &botmaid.Help{
 			Menu:  "name",
@@ -39,7 +42,7 @@ func init() {
 
 %v`,
 			SetFlag: func(f *pflag.FlagSet) {
-				f.String("lang", "cn", "指定生成姓名的语言")
+				f.String("lang", "cn", "指定生成姓名的语言（cn、en 或 jp）")
 			},
 		},
 	})

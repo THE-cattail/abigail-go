@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"log"
 
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
@@ -11,6 +11,7 @@ import (
 
 type callType struct {
 	List, Resped []int64
+	At           []string
 
 	Sponsor *botmaid.User
 }
@@ -69,12 +70,14 @@ func init() {
 				}
 
 				l := ""
-				for _, user := range callMap[u.Chat.ID].List {
-					if !botmaid.In(user, callMap[u.Chat.ID].Resped) {
-						l += fmt.Sprintf("%v ", user)
+				for i := range callMap[u.Chat.ID].List {
+					if !botmaid.In(callMap[u.Chat.ID].List[i], callMap[u.Chat.ID].Resped) {
+						if l != "" {
+							l += " "
+						}
+						l += callMap[u.Chat.ID].At[i]
 					}
 				}
-				l = strings.TrimSpace(l)
 
 				botmaid.Reply(u, fmt.Sprintf("未到名单：%v", l))
 				return true
@@ -82,18 +85,19 @@ func init() {
 
 			if len(f.Args()) > 1 {
 				callMap[u.Chat.ID] = &callType{
-					List:   []int64{},
-					Resped: []int64{},
+					Sponsor: u.User,
 				}
 
 				for i := 1; i < len(f.Args()); i++ {
 					id, err := bm.ParseUserID(u, f.Args()[i])
 					if err != nil {
-						botmaid.Reply(u, fmt.Sprintf(random.String(bm.Words["invalidUser"]), botmaid.At(u.User), f.Args()[1]))
+						log.Println(err)
+						botmaid.Reply(u, fmt.Sprintf(random.String(bm.Words["invalidUser"]), botmaid.At(u.User), f.Args()[i]))
 						return true
 					}
 
 					callMap[u.Chat.ID].List = append(callMap[u.Chat.ID].List, id)
+					callMap[u.Chat.ID].At = append(callMap[u.Chat.ID].At, f.Args()[i])
 				}
 
 				botmaid.Reply(u, "开始点名。")

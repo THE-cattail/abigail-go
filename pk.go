@@ -50,8 +50,6 @@ func pkResp(u *botmaid.Update) {
 		return
 	}
 
-	pkMap[u.Chat.ID] = nil
-
 	r := coc.PK(pkMap[u.Chat.ID].Results[0].Result, pkMap[u.Chat.ID].Results[1].Result)
 
 	if r == coc.PKDraw {
@@ -64,5 +62,6 @@ func pkResp(u *botmaid.Update) {
 		v = botmaid.At(pkMap[u.Chat.ID].Results[1].User)
 	}
 
+	pkMap[u.Chat.ID] = nil
 	reply(u, fmt.Sprintf("对抗检定的结果为%v胜利。", v))
 }

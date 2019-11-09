@@ -17,13 +17,14 @@ type scType struct {
 }
 
 var (
-	fmtInvalidSCExp = "%v，”%v“是不合法的 SAN Check 表达式，请查阅规则书中的相关条目。"
-	scMap           = map[int64]map[int64]*scType{}
+	scMap = map[int64]map[int64]*scType{}
 )
 
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
+			fmtInvalidSCExp := "%v，“%v”是不合法的 SAN Check 表达式，请查阅规则书中的相关条目。"
+
 			if len(f.Args()) == 2 {
 				if scMap[u.Chat.ID] == nil {
 					scMap[u.Chat.ID] = map[int64]*scType{}

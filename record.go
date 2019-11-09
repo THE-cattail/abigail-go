@@ -10,20 +10,26 @@ import (
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			get, _ := f.GetString("get")
-
-			if get != "" {
-				s := bm.Redis.HGet("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, get)).Val()
-
-				if s == "" {
-					botmaid.Reply(u, fmt.Sprintf("条目“%v”未被记录。", get))
-					return true
-				}
-
-				botmaid.Reply(u, get+"：\n"+s)
+			del, _ := f.GetBool("del")
+			if del {
+				bm.Redis.HDel("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, f.Args()[1]))
+				botmaid.Reply(u, f.Args()[1]+"已被删除。")
+				return true
 			}
 
 			if len(f.Args()) == 2 {
+				s := bm.Redis.HGet("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, f.Args()[1])).Val()
+
+				if s == "" {
+					botmaid.Reply(u, fmt.Sprintf("条目“%v”未被记录。", f.Args()[1]))
+					return true
+				}
+
+				botmaid.Reply(u, f.Args()[1]+"：\n"+s)
+				return true
+			}
+
+			if len(f.Args()) == 3 {
 				bm.Redis.HSet("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, f.Args()[1]), f.Args()[2])
 				botmaid.Reply(u, f.Args()[1]+"已被记录。")
 				return true
@@ -35,11 +41,11 @@ func init() {
 			Menu:  "record",
 			Help:  "记录功能",
 			Names: []string{"record", "rec"},
-			Full: `使用方法：record [选项] 条目 内容
+			Full: `使用方法：record 条目 [内容]
 
 %v`,
 			SetFlag: func(f *pflag.FlagSet) {
-				f.String("get", "", "获得条目的内容")
+				f.BoolP("del", "d", false, "删除指定条目")
 			},
 		},
 	})
