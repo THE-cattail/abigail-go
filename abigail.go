@@ -16,6 +16,27 @@ var (
 	loc, _  = time.LoadLocation("Asia/Shanghai")
 )
 
+func init() {
+	bm.AddCommand(&botmaid.Command{
+		Do: bm.VersionCommandDo,
+		Help: &botmaid.Help{
+			Menu:    "version",
+			Names:   []string{"version", "ver"},
+			SetFlag: bm.VersionCommandHelpSetFlag,
+		},
+	})
+
+	bm.AddCommand(&botmaid.Command{
+		Do: bm.VersionMasterCommandDo,
+		Help: &botmaid.Help{
+			Menu:    "verset",
+			Names:   []string{"verset"},
+			SetFlag: bm.VersionMasterCommandHelpSetFlag,
+		},
+		Master: true,
+	})
+}
+
 func main() {
 	err := bm.Start()
 	if err != nil {
