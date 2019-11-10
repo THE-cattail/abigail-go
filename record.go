@@ -13,7 +13,7 @@ func init() {
 			del, _ := f.GetBool("del")
 			if del {
 				bm.Redis.HDel("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, f.Args()[1]))
-				botmaid.Reply(u, f.Args()[1]+"已被删除。")
+				bm.Reply(u, f.Args()[1]+"已被删除。")
 				return true
 			}
 
@@ -21,17 +21,17 @@ func init() {
 				s := bm.Redis.HGet("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, f.Args()[1])).Val()
 
 				if s == "" {
-					botmaid.Reply(u, fmt.Sprintf("条目“%v”未被记录。", f.Args()[1]))
+					bm.Reply(u, fmt.Sprintf("条目“%v”未被记录。", f.Args()[1]))
 					return true
 				}
 
-				botmaid.Reply(u, f.Args()[1]+"：\n"+s)
+				bm.Reply(u, f.Args()[1]+"：\n"+s)
 				return true
 			}
 
 			if len(f.Args()) == 3 {
 				bm.Redis.HSet("record", fmt.Sprintf("%v_%v_%v", u.Bot.ID, u.Chat.ID, f.Args()[1]), f.Args()[2])
-				botmaid.Reply(u, f.Args()[1]+"已被记录。")
+				bm.Reply(u, f.Args()[1]+"已被记录。")
 				return true
 			}
 

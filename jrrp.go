@@ -19,7 +19,7 @@ func init() {
 			bm.Redis.HSet("jrrp", "time", time)
 
 			if bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val() != "" {
-				botmaid.Reply(u, u.User.NickName+bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val())
+				bm.Reply(u, u.User.NickName+bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val())
 				return true
 			}
 
@@ -28,7 +28,7 @@ func init() {
 				"人类学",
 				"估价",
 				"考古学",
-				"技艺：" + random.String([]string{
+				"技艺：" + random.Slice([]string{
 					"表演",
 					"美术",
 					"摄影",
@@ -46,7 +46,7 @@ func init() {
 					"粉刷/油漆工",
 					"制陶",
 					"雕塑",
-				}),
+				}).(string),
 				"魅惑",
 				"攀爬",
 				"计算机使用",
@@ -58,7 +58,7 @@ func init() {
 				"电气维修",
 				"电子学",
 				"话术",
-				"格斗：" + random.String([]string{
+				"格斗：" + random.Slice([]string{
 					"鞭子",
 					"电锯",
 					"斗殴",
@@ -67,8 +67,8 @@ func init() {
 					"绞索",
 					"链枷",
 					"矛",
-				}),
-				"射击：" + random.String([]string{
+				}).(string),
+				"射击：" + random.Slice([]string{
 					"步枪/霰弹枪",
 					"冲锋枪",
 					"弓",
@@ -76,7 +76,7 @@ func init() {
 					"机枪",
 					"手枪",
 					"重武器",
-				}),
+				}).(string),
 				"急救",
 				"历史",
 				"恐吓",
@@ -99,7 +99,7 @@ func init() {
 				"精神分析",
 				"心理学",
 				"骑术",
-				"科学：" + random.String([]string{
+				"科学：" + random.Slice([]string{
 					"地质学",
 					"化学",
 					"生物学",
@@ -113,15 +113,15 @@ func init() {
 					"工程学",
 					"气象学",
 					"司法科学",
-				}),
+				}).(string),
 				"妙手",
 				"侦察",
 				"潜行",
-				"生存：" + random.String([]string{
+				"生存：" + random.Slice([]string{
 					"狩猎知识",
 					"搭建住所",
 					"危险意识",
-				}),
+				}).(string),
 				"游泳",
 				"投掷",
 				"追踪",
@@ -131,7 +131,7 @@ func init() {
 				"读唇",
 				"炮术",
 				"驯兽",
-				random.String([]string{
+				random.Slice([]string{
 					"力量检定",
 					"力量对抗",
 					"敏捷检定",
@@ -143,11 +143,11 @@ func init() {
 					"意志对抗",
 					"教育检定",
 					"幸运检定",
-				}),
+				}).(string),
 				"阅读神话典籍",
 				"战斗",
 				"追逐",
-				"法术：" + random.String([]string{
+				"法术：" + random.Slice([]string{
 					"灵魂分配术",
 					"耶德·艾塔德放逐术",
 					"束缚术",
@@ -254,9 +254,9 @@ func init() {
 					"肢体凋萎术",
 					"真言术",
 					"折磨术",
-				}),
+				}).(string),
 				"孤注一掷",
-				random.String([]string{
+				random.Slice([]string{
 					"守序善良",
 					"中立善良",
 					"混乱善良",
@@ -266,21 +266,21 @@ func init() {
 					"守序邪恶",
 					"中立邪恶",
 					"混乱邪恶",
-				}) + "跑团",
+				}).(string) + "跑团",
 				"SAN check",
 				"调戏小阿比",
 			}
 
-			can := random.String(jrrpEvent)
-			cannot := random.String(jrrpEvent)
+			can := random.Slice(jrrpEvent)
+			cannot := random.Slice(jrrpEvent)
 			for can == cannot {
-				cannot = random.String(jrrpEvent)
+				cannot = random.Slice(jrrpEvent)
 			}
 
 			s := fmt.Sprintf("今日的人品值是——%v，宜%v，忌%v", random.Int(1, 100), can, cannot)
 
 			bm.Redis.HSet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID), s)
-			botmaid.Reply(u, botmaid.At(u.User)+s)
+			bm.Reply(u, bm.At(u.User)+s)
 			return true
 		},
 		Help: &botmaid.Help{

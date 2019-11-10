@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/catsworld/botmaid"
-	"github.com/catsworld/botmaid/random"
 	"github.com/spf13/pflag"
 )
 
@@ -27,7 +26,7 @@ func init() {
 			if cancel {
 				if callMap[u.Chat.ID] != nil && callMap[u.Chat.ID].Sponsor.ID == u.User.ID {
 					callMap[u.Chat.ID] = nil
-					botmaid.Reply(u, "点名已取消。")
+					bm.Reply(u, "点名已取消。")
 				}
 				return true
 			}
@@ -43,13 +42,13 @@ func init() {
 				return false
 			}
 
-			if botmaid.In(u.User.ID, callMap[u.Chat.ID].List) && !botmaid.In(u.User.ID, callMap[u.Chat.ID].Resped) {
+			if botmaid.Contains(callMap[u.Chat.ID].List, u.User.ID) && !botmaid.Contains(callMap[u.Chat.ID].Resped, u.User.ID) {
 				callMap[u.Chat.ID].Resped = append(callMap[u.Chat.ID].Resped, u.User.ID)
 			}
 
 			if len(callMap[u.Chat.ID].List) == len(callMap[u.Chat.ID].Resped) {
 				callMap[u.Chat.ID] = nil
-				botmaid.Reply(u, "点名完成。")
+				bm.Reply(u, "点名完成。")
 			}
 
 			return false
@@ -63,15 +62,13 @@ func init() {
 
 			if status {
 				if callMap[u.Chat.ID] == nil {
-					botmaid.Reply(u, random.String([]string{
-						"没有正在进行的点名。",
-					}))
+					bm.Reply(u, "没有正在进行的点名。")
 					return true
 				}
 
 				l := ""
 				for i := range callMap[u.Chat.ID].List {
-					if !botmaid.In(callMap[u.Chat.ID].List[i], callMap[u.Chat.ID].Resped) {
+					if !botmaid.Contains(callMap[u.Chat.ID].Resped, callMap[u.Chat.ID].List[i]) {
 						if l != "" {
 							l += " "
 						}
@@ -79,7 +76,7 @@ func init() {
 					}
 				}
 
-				botmaid.Reply(u, fmt.Sprintf("未到名单：%v", l))
+				bm.Reply(u, fmt.Sprintf("未到名单：%v", l))
 				return true
 			}
 
@@ -89,10 +86,10 @@ func init() {
 				}
 
 				for i := 1; i < len(f.Args()); i++ {
-					id, err := bm.ParseUserID(u, f.Args()[i])
+					id, err := (*u.Bot.API).ParseUserID(u, f.Args()[i])
 					if err != nil {
 						log.Println(err)
-						botmaid.Reply(u, fmt.Sprintf(random.String(bm.Words["invalidUser"]), botmaid.At(u.User), f.Args()[i]))
+						bm.Reply(u, fmt.Sprintf(bm.Words["invalidUser"], bm.At(u.User), f.Args()[i]))
 						return true
 					}
 
@@ -100,7 +97,7 @@ func init() {
 					callMap[u.Chat.ID].At = append(callMap[u.Chat.ID].At, f.Args()[i])
 				}
 
-				botmaid.Reply(u, "开始点名。")
+				bm.Reply(u, "开始点名。")
 				return true
 			}
 

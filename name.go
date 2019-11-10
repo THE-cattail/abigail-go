@@ -16,22 +16,22 @@ func init() {
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			lang, _ := f.GetString("lang")
 
-			if botmaid.In(lang, "cn", "中", "中文") {
-				botmaid.Reply(u, rand.GetRand().ChineseName())
+			if lang == "cn" {
+				bm.Reply(u, rand.GetRand().ChineseName())
 				return true
 			}
 
-			if botmaid.In(lang, "en", "英", "英文") {
-				botmaid.Reply(u, randomdata.FullName(randomdata.RandomGender))
+			if lang == "en" {
+				bm.Reply(u, randomdata.FullName(randomdata.RandomGender))
 				return true
 			}
 
-			if botmaid.In(lang, "jp", "日", "日文") {
-				botmaid.Reply(u, gimei.NewName().Kanji())
+			if lang == "jp" {
+				bm.Reply(u, gimei.NewName().Kanji())
 				return true
 			}
 
-			botmaid.Reply(u, fmt.Sprintf("语言“%v”未收录", lang))
+			bm.Reply(u, fmt.Sprintf("语言“%v”未收录", lang))
 			return true
 		},
 		Help: &botmaid.Help{

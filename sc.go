@@ -41,7 +41,7 @@ func init() {
 
 					if v == '/' && now == 0 {
 						if scMap[u.Chat.ID][u.User.ID] != nil {
-							reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+							reply(u, fmt.Sprintf(fmtInvalidSCExp, bm.At(u.User), f.Args()[1]))
 							return true
 						}
 
@@ -53,23 +53,23 @@ func init() {
 				}
 
 				if scMap[u.Chat.ID][u.User.ID] == nil {
-					reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+					reply(u, fmt.Sprintf(fmtInvalidSCExp, bm.At(u.User), f.Args()[1]))
 					return true
 				}
 
 				_, err := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
 				if err != nil {
-					reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+					reply(u, fmt.Sprintf(fmtInvalidSCExp, bm.At(u.User), f.Args()[1]))
 					return true
 				}
 
 				_, err = nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
 				if err != nil {
-					reply(u, fmt.Sprintf(fmtInvalidSCExp, botmaid.At(u.User), f.Args()[1]))
+					reply(u, fmt.Sprintf(fmtInvalidSCExp, bm.At(u.User), f.Args()[1]))
 					return true
 				}
 
-				reply(u, fmt.Sprintf("%v，请进行一次意志检定。", botmaid.At(u.User)))
+				reply(u, fmt.Sprintf("%v，请进行一次意志检定。", bm.At(u.User)))
 				return true
 			}
 
@@ -105,5 +105,5 @@ func scResp(u *botmaid.Update) {
 	}
 
 	scMap[u.Chat.ID][u.User.ID] = nil
-	reply(u, fmt.Sprintf("%v的理智损失了 %v 点。", botmaid.At(u.User), r))
+	reply(u, fmt.Sprintf("%v的理智损失了 %v 点。", bm.At(u.User), r))
 }

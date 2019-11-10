@@ -14,7 +14,7 @@ func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			if bm.BeAt(u) && bm.IsMaster(u.User) {
-				botmaid.Reply(u, random.String([]string{
+				bm.Reply(u, random.Slice([]string{
 					"多给我一些，多到满溢……",
 					"这就是身为「塞勒姆魔女」的我……请不要害怕哦，御主。",
 					"能感受到神的吐息……",
@@ -39,7 +39,7 @@ func init() {
 					"我……我不是魔女。你才是魔女。因为你是魔术师啊……但是，即便如此，和御主在一起……或许……也不坏……",
 					"御主，我害怕狗。害怕到全身颤抖……它们会吠叫，也会咬人，所以总是忍不住，想让它们彻底闭嘴……",
 					"像这样成为一名从者或许也是某种启示。我不会放弃。请赐予这个世界安宁与信任。",
-				}))
+				}).(string))
 				return true
 			}
 
@@ -50,7 +50,7 @@ func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			if bm.BeAt(u) {
-				botmaid.Reply(u, random.String([]string{
+				bm.Reply(u, random.Slice([]string{
 					"真是个坏孩子……",
 					"这不是我的错……",
 					"祈祷吧。",
@@ -71,7 +71,7 @@ func init() {
 吾将化身寄宿您神髓的现世之身。
 跨越蔷薇的沉睡，抵达穷极之门吧！
 光壳流溢的虚树（Qliphoth Rhizome）！`,
-				}))
+				}).(string))
 				return true
 			}
 

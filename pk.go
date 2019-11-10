@@ -57,9 +57,9 @@ func pkResp(u *botmaid.Update) {
 		return
 	}
 
-	v := botmaid.At(pkMap[u.Chat.ID].Results[0].User)
+	v := bm.At(pkMap[u.Chat.ID].Results[0].User)
 	if r == coc.PKBWin {
-		v = botmaid.At(pkMap[u.Chat.ID].Results[1].User)
+		v = bm.At(pkMap[u.Chat.ID].Results[1].User)
 	}
 
 	pkMap[u.Chat.ID] = nil

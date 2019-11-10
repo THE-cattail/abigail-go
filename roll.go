@@ -18,11 +18,11 @@ func init() {
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
 			sum, _ := f.GetBool("sum")
 			if sum {
-				reply(u, fmt.Sprintf("%v陷入了临时疯狂，其总结症状为：\n%v", botmaid.At(u.User), coc.RollMadSummary()))
+				reply(u, fmt.Sprintf("%v陷入了临时疯狂，其总结症状为：\n%v", bm.At(u.User), coc.RollMadSummary()))
 				return true
 			}
 
-			reply(u, fmt.Sprintf("%v陷入了临时疯狂，其即时症状为：\n%v", botmaid.At(u.User), coc.RollMad()))
+			reply(u, fmt.Sprintf("%v陷入了临时疯狂，其即时症状为：\n%v", bm.At(u.User), coc.RollMad()))
 			return true
 		},
 		Help: &botmaid.Help{
@@ -46,7 +46,7 @@ func init() {
 				num = 1
 			}
 			if num > 5 {
-				botmaid.Reply(u, "同时生成的角色卡数量至多为 5。")
+				bm.Reply(u, "同时生成的角色卡数量至多为 5。")
 			}
 
 			c := &coc.Character{}
@@ -92,7 +92,7 @@ func init() {
 				s += "该调查员是一个" + c.Feature
 			}
 
-			botmaid.Reply(u, s)
+			bm.Reply(u, s)
 			return true
 		},
 		Help: &botmaid.Help{
@@ -111,9 +111,7 @@ func init() {
 
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			fmtRoll := []string{
-				"%v的%v是——%v！",
-			}
+			fmtRoll := "%v的%v是——%v！"
 
 			w := ""
 			e := ""
@@ -154,7 +152,7 @@ func init() {
 						}
 						s += ") = " + strconv.Itoa(sum)
 
-						reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"骰点结果", s))
+						reply(u, fmt.Sprintf(fmtRoll, bm.At(u.User), w+"骰点结果", s))
 						return true
 					}
 				}
@@ -180,7 +178,7 @@ func init() {
 				}
 
 				if err == nil {
-					reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"结果", ee.Result.Value))
+					reply(u, fmt.Sprintf(fmtRoll, bm.At(u.User), w+"结果", ee.Result.Value))
 					return true
 				}
 			} else {
@@ -196,7 +194,7 @@ func init() {
 				punish, _ := f.GetInt("punish")
 				bp := bonus - punish
 				if math.Abs(float64(bp)) > 256 {
-					botmaid.Reply(u, "奖罚骰数量差的绝对值不应超过 256。")
+					bm.Reply(u, "奖罚骰数量差的绝对值不应超过 256。")
 					return true
 				}
 				r := coc.Check(n, bp)
@@ -217,7 +215,7 @@ func init() {
 					s += "，检定失败"
 				}
 
-				reply(u, fmt.Sprintf(random.String(fmtRoll), botmaid.At(u.User), w+"检定结果", s))
+				reply(u, fmt.Sprintf(fmtRoll, bm.At(u.User), w+"检定结果", s))
 
 				if pkMap[u.Chat.ID] != nil {
 					pkMap[u.Chat.ID].Results = append(pkMap[u.Chat.ID].Results, pkRollResult{
@@ -237,7 +235,7 @@ func init() {
 				return true
 			}
 
-			reply(u, fmt.Sprintf(random.String(fmtRoll), u.User.NickName, "随机结果", random.String(f.Args()[1:])))
+			reply(u, fmt.Sprintf(fmtRoll, u.User.NickName, "随机结果", random.Slice(f.Args()[1:]).(string)))
 			return true
 		},
 		Help: &botmaid.Help{

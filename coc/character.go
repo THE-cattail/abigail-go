@@ -98,8 +98,8 @@ func NewCharacter(full bool) *Character {
 			c.APP -= 25
 		}
 
-		c.Name = random.String([]string{rand.GetRand().ChineseName(), randomdata.FullName(randomdata.RandomGender), gimei.NewName().Kanji()})
-		c.Class = random.String([]string{
+		c.Name = random.Slice([]string{rand.GetRand().ChineseName(), randomdata.FullName(randomdata.RandomGender), gimei.NewName().Kanji()}).(string)
+		c.Class = random.Slice([]string{
 			"会计师",
 			"杂技演员",
 			"演员",
@@ -217,7 +217,7 @@ func NewCharacter(full bool) *Character {
 			"白领工人",
 			"狂热者",
 			"饲养员",
-		})
+		}).(string)
 
 		/*
 			charAppearance := []string{
@@ -277,7 +277,7 @@ func NewCharacter(full bool) *Character {
 
 		//c.Appearance = charAppearance[d1] + " " + charAppearance[d2] + " " + charAppearance[d3]
 
-		c.Thought = random.String([]string{
+		c.Thought = random.Slice([]string{
 			"信仰并祈并一位大能。（选择一位大能）",
 			"认为人类无需上帝。（无神论者或人文学家等）",
 			"认为科学是万能的。（选择一种科学理论）",
@@ -288,9 +288,9 @@ func NewCharacter(full bool) *Character {
 			"喜欢政治。（选择一种党派）",
 			"的名言是“金钱就是力量，我的朋友，我将竭尽全力获取我能看到的一切。”",
 			"是一名激进主义者。（选择一种激进主义）",
-		})
+		}).(string)
 
-		c.Person = random.String([]string{
+		c.Person = random.Slice([]string{
 			"父母辈。（选择父亲、母亲、继父或继母）",
 			"祖父母辈。（选择祖父、祖母、外祖父或外祖母等）",
 			"兄弟姐妹。（选择一位兄弟姐妹）",
@@ -301,9 +301,9 @@ func NewCharacter(full bool) *Character {
 			"名人、偶像或者英雄。（选择一位名人、偶像或英雄）",
 			"另一名调查员。（选择一名调查员）",
 			"一位 NPC。（向 KP 询问并选择一位 NPC）",
-		})
+		}).(string)
 
-		c.Reason = random.String([]string{
+		c.Reason = random.Slice([]string{
 			"自己欠了 TA 人情。（选择一个场景）",
 			"TA 教会了自己一些东西。（选择学会的内容）",
 			"TA 给了自己生命的意义。（选择一个场景）",
@@ -314,9 +314,9 @@ func NewCharacter(full bool) *Character {
 			"自己对 TA 有后悔的感觉。（选择一个场景）",
 			"自己试图证明自己比 TA 更出色。（选择 TA 的缺点）",
 			"TA 扰乱了自己的人生，而自己寻求复仇。（选择一个场景）",
-		})
+		}).(string)
 
-		c.Place = random.String([]string{
+		c.Place = random.Slice([]string{
 			"自己最爱的学府。（选择一所学校）",
 			"自己的故乡。（选择一处地方）",
 			"相识初恋之处。（选择一处地方）",
@@ -327,9 +327,9 @@ func NewCharacter(full bool) *Character {
 			"家族所在。（选择一处地方）",
 			"生命中最高兴时的所在。（选择一处地方）",
 			"工作地点。（选择一处地方）",
-		})
+		}).(string)
 
-		c.Treasure = random.String([]string{
+		c.Treasure = random.Slice([]string{
 			"与自己得意技相关之物。（选择一件物品）",
 			"职业必需品。（选择一件物品）",
 			"童年的遗留物。（选择一件物品）",
@@ -340,9 +340,9 @@ func NewCharacter(full bool) *Character {
 			"体育用品。（选择一件物品）",
 			"武器。（选择一件物品）",
 			"宠物。（选择一件物品）",
-		})
+		}).(string)
 
-		c.Feature = random.String([]string{
+		c.Feature = random.Slice([]string{
 			"慷慨大方的人。",
 			"善待动物的人。",
 			"梦想家。",
@@ -353,7 +353,7 @@ func NewCharacter(full bool) *Character {
 			"忠心在我的人。",
 			"拥有好名头的人。",
 			"雄心壮志的人。",
-		})
+		}).(string)
 	}
 
 	return c

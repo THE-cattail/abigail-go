@@ -216,7 +216,7 @@ var (
 
 // RollMad returns a string representing a random temporary crazy instant symptom.
 func RollMad() string {
-	return random.String([]string{
+	return random.Slice([]string{
 		fmt.Sprintf("失忆：你发现自己只记得最后身处的安全地点，却没有任何来到这里的记忆，持续 %v 轮。", random.Int(1, 10)),
 		fmt.Sprintf("假性残疾：你陷入了心理性的失明、失聪以及躯体缺失感中，持续 %v 轮。", random.Int(1, 10)),
 		fmt.Sprintf("暴力倾向：你陷入了六亲不认的暴力行为中，对周围的人进行着无差别的攻击，持续 %v 轮。", random.Int(1, 10)),
@@ -224,15 +224,15 @@ func RollMad() string {
 		fmt.Sprintf("人际依赖：你将他人误认为了你重要之人并且努力的会与那个人保持那种关系，持续 %v 轮。", random.Int(1, 10)),
 		fmt.Sprintf("昏厥：你当场昏倒，持续 %v 轮。", random.Int(1, 10)),
 		fmt.Sprintf("逃避行为：你会用任何的手段试图逃离现在所处的位置，即使这意味着开走唯一一辆交通工具并将其它人抛诸脑后，持续 %v 轮。", random.Int(1, 10)),
-		fmt.Sprintf("竭嘶底里：你表现出%v的极端情绪，持续 %v 轮。", random.String([]string{"大笑", "哭泣", "嘶吼", "害怕"}), random.Int(1, 10)),
-		fmt.Sprintf("恐惧：%v，持续 %v 轮。", random.String(madPhobia), random.Int(1, 10)),
-		fmt.Sprintf("躁狂：%v，持续 %v 轮。", random.String(madMania), random.Int(1, 10)),
-	})
+		fmt.Sprintf("竭嘶底里：你表现出%v的极端情绪，持续 %v 轮。", random.Slice([]string{"大笑", "哭泣", "嘶吼", "害怕"}).(string), random.Int(1, 10)),
+		fmt.Sprintf("恐惧：%v，持续 %v 轮。", random.Slice(madPhobia).(string), random.Int(1, 10)),
+		fmt.Sprintf("躁狂：%v，持续 %v 轮。", random.Slice(madMania).(string), random.Int(1, 10)),
+	}).(string)
 }
 
 // RollMadSummary returns a string representing a random temporary mad summary symptom.
 func RollMadSummary() string {
-	return random.String([]string{
+	return random.Slice([]string{
 		fmt.Sprintf("失忆：你在 %v 小时后恢复清醒，发现自己身处一个陌生的地方，并忘记了自己是谁。你的记忆会随时间恢复。", random.Int(1, 10)),
 		fmt.Sprintf("被窃：你在 %v 小时后恢复清醒，发觉自己身体毫发无损，而你身上所有有价值的东西都消失了。如果你携带着宝贵之物，进行幸运检定来决定其是否被盗。", random.Int(1, 10)),
 		fmt.Sprintf("遍体鳞伤：你在 %v 小时后恢复清醒，发现自己身上满是拳痕和瘀伤。生命值减少到疯狂前的一半，但这不会造成重伤。", random.Int(1, 10)),
@@ -241,7 +241,7 @@ func RollMadSummary() string {
 		fmt.Sprintf("重要之人：你在 %v 小时后恢复清醒，发现自己曾不顾一切地接近你的重要之人，并为你们之间的关系做出行动。", random.Int(1, 10)),
 		fmt.Sprintf("被收容：你在 %v 小时后恢复清醒，发现自己在精神病院病房或警察局牢房中。", random.Int(1, 10)),
 		fmt.Sprintf("逃避行为：你在 %v 小时后恢复清醒，发现自己在很远的地方。", random.Int(1, 10)),
-		fmt.Sprintf("恐惧：你在 %v 小时后恢复清醒，患上恐惧症：%v。", random.Int(1, 10), random.String(madPhobia)),
-		fmt.Sprintf("躁狂：你在 %v 小时后恢复清醒，患上躁狂症：%v。", random.Int(1, 10), random.String(madMania)),
-	})
+		fmt.Sprintf("恐惧：你在 %v 小时后恢复清醒，患上恐惧症：%v。", random.Int(1, 10), random.Slice(madPhobia).(string)),
+		fmt.Sprintf("躁狂：你在 %v 小时后恢复清醒，患上躁狂症：%v。", random.Int(1, 10), random.Slice(madMania).(string)),
+	}).(string)
 }
