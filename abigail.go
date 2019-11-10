@@ -75,6 +75,16 @@ func init() {
 			SetFlag: bm.VersetCommandHelpSetFlag,
 		},
 	})
+
+	bm.AddCommand(&botmaid.Command{
+		Do: bm.SubscribeCommandDo,
+		Help: &botmaid.Help{
+			Menu:  "subscribe",
+			Help:  "订阅消息",
+			Names: []string{"subscribe", "sub"},
+			Usage: "使用方法：subscribe 条目",
+		},
+	})
 }
 
 func main() {

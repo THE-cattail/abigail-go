@@ -1,5 +1,5 @@
-// Package nyamath includes some functions for mathmatics.
-package nyamath
+// Package cocmath includes some functions for mathmatics.
+package cocmath
 
 //Qpow calculates x^y and returns the result with the quick pow algorithm.
 func Qpow(x, y int) int {

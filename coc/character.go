@@ -2,7 +2,7 @@ package coc
 
 import (
 	"github.com/Pallinder/go-randomdata"
-	"github.com/catsworld/abigail/nyamath"
+	"github.com/catsworld/abigail/cocmath"
 	"github.com/catsworld/botmaid/random"
 	"github.com/goroom/rand"
 	"github.com/mattn/go-gimei"
@@ -34,23 +34,23 @@ func improvingCheck(a int) int {
 func NewCharacter(full bool) *Character {
 	c := &Character{}
 
-	e, _ := nyamath.New("3d6*5")
+	e, _ := cocmath.New("3d6*5")
 	c.STR = e.Result.Value
-	e, _ = nyamath.New("3d6*5")
+	e, _ = cocmath.New("3d6*5")
 	c.DEX = e.Result.Value
-	e, _ = nyamath.New("3d6*5")
+	e, _ = cocmath.New("3d6*5")
 	c.POW = e.Result.Value
-	e, _ = nyamath.New("3d6*5")
+	e, _ = cocmath.New("3d6*5")
 	c.CON = e.Result.Value
-	e, _ = nyamath.New("3d6*5")
+	e, _ = cocmath.New("3d6*5")
 	c.APP = e.Result.Value
-	e, _ = nyamath.New("(2d6+6)*5")
+	e, _ = cocmath.New("(2d6+6)*5")
 	c.EDU = e.Result.Value
-	e, _ = nyamath.New("(2d6+6)*5")
+	e, _ = cocmath.New("(2d6+6)*5")
 	c.SIZ = e.Result.Value
-	e, _ = nyamath.New("(2d6+6)*5")
+	e, _ = cocmath.New("(2d6+6)*5")
 	c.INT = e.Result.Value
-	e, _ = nyamath.New("3d6*5")
+	e, _ = cocmath.New("3d6*5")
 	c.Luck = e.Result.Value
 
 	if full {
@@ -58,7 +58,7 @@ func NewCharacter(full bool) *Character {
 		if c.Age < 20 {
 			c.AgeMention = "力量和体型合计减5点"
 			c.EDU -= 5
-			e, _ := nyamath.New("3d6*5")
+			e, _ := cocmath.New("3d6*5")
 			if e.Result.Value > c.Luck {
 				c.Luck = e.Result.Value
 			}

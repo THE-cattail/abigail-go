@@ -1,4 +1,4 @@
-package nyamath
+package cocmath
 
 import (
 	"errors"

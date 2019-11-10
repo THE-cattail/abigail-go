@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/catsworld/abigail/coc"
-	"github.com/catsworld/abigail/nyamath"
+	"github.com/catsworld/abigail/cocmath"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
 	"github.com/spf13/pflag"
@@ -156,10 +156,10 @@ func init() {
 
 			n, err := strconv.Atoi(e)
 			if err != nil || n < 0 {
-				ee, err := nyamath.New(e)
+				ee, err := cocmath.New(e)
 				if err != nil && len(f.Args()) == 2 {
 					w = f.Args()[1] + "骰点"
-					ee, err = nyamath.New("1d100")
+					ee, err = cocmath.New("1d100")
 				} else {
 					if len(es) == 2 {
 						_, err := strconv.Atoi(es[1])

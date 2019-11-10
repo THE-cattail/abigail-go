@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/catsworld/abigail/coc"
-	"github.com/catsworld/abigail/nyamath"
+	"github.com/catsworld/abigail/cocmath"
 	"github.com/catsworld/botmaid"
 	"github.com/catsworld/botmaid/random"
 	"github.com/spf13/pflag"
@@ -57,13 +57,13 @@ func init() {
 					return true
 				}
 
-				_, err := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
+				_, err := cocmath.New(scMap[u.Chat.ID][u.User.ID].a)
 				if err != nil {
 					reply(u, fmt.Sprintf(fmtInvalidSCExp, bm.At(u.User), f.Args()[1]))
 					return true
 				}
 
-				_, err = nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
+				_, err = cocmath.New(scMap[u.Chat.ID][u.User.ID].b)
 				if err != nil {
 					reply(u, fmt.Sprintf(fmtInvalidSCExp, bm.At(u.User), f.Args()[1]))
 					return true
@@ -87,8 +87,8 @@ func init() {
 func scResp(u *botmaid.Update) {
 	time.Sleep(time.Second * time.Duration(random.Int(1, 3)))
 
-	a, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].a)
-	b, _ := nyamath.New(scMap[u.Chat.ID][u.User.ID].b)
+	a, _ := cocmath.New(scMap[u.Chat.ID][u.User.ID].a)
+	b, _ := cocmath.New(scMap[u.Chat.ID][u.User.ID].b)
 
 	r := 0
 
