@@ -34,25 +34,12 @@ func init() {
 	bm.Words["undefCommand"] = "%v，命令“%v”不存在，请检查拼写或该命令的帮助条目后重试。"
 	bm.Words["unregMaster"] = "%v，%v的 master 权限已被解除。"
 	bm.Words["regMaster"] = "%v，%v已获得 master 权限。"
-	bm.Words["unbanUser"] = "%v，已解除%v的屏蔽。"
-	bm.Words["banUser"] = "%v，%v已被屏蔽。"
 	bm.Words["noPermission"] = "%v，你没有使用命令“%v”的权限。"
 	bm.Words["invalidParameters"] = "%v，命令“%v”的参数格式输入错误。"
 	bm.Words["noHelpText"] = "%v，命令“%v”没有帮助文本。"
 	bm.Words["invalidUser"] = "%v，用户“%v”格式非法或不存在。"
-	bm.Words["helpHelp"] = "显示帮助"
-	bm.Words["masterHelp"] = "增加/移除 master"
-	bm.Words["banHelp"] = "屏蔽/解除用户"
-	bm.Words["helpHelp"] = "显示帮助"
-	bm.Words["helpHelpFull"] = `使用方法：help [命令]
-
-%v`
-	bm.Words["masterHelp"] = "增加/移除 master"
-	bm.Words["masterHelpFull"] = `使用方法：master @用户
-
-%v`
-	bm.Words["banHelp"] = "屏蔽/解除用户"
-	bm.Words["banHelpFull"] = `使用方法：ban @用户
-
-%v`
+	bm.Words["versionLogHelp"] = "显示当前版本的更新日志"
+	bm.Words["versetVerHelp"] = "指定管理的版本"
+	bm.Words["versetLogHelp"] = "向更新日志添加一项"
+	bm.Words["versetBroadcastHelp"] = "广播更新日志"
 }

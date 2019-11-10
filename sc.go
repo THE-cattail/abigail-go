@@ -79,9 +79,7 @@ func init() {
 			Menu:  "sc",
 			Help:  "SAN check 功能",
 			Names: []string{"sc"},
-			Full: `使用方法：sc SANCheck表达式
-
-%v`,
+			Usage: "使用方法：sc SANCheck表达式",
 		},
 	})
 }

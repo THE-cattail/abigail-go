@@ -39,9 +39,7 @@ func init() {
 			Menu:  "wiki",
 			Help:  "CoC 百科功能",
 			Names: []string{"wiki"},
-			Full: `使用方法：wiki 条目
-
-%v`,
+			Usage: "使用方法：wiki 条目",
 		},
 	})
 }

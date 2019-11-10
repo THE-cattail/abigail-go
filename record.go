@@ -41,9 +41,7 @@ func init() {
 			Menu:  "record",
 			Help:  "记录功能",
 			Names: []string{"record", "rec"},
-			Full: `使用方法：record 条目 [内容]
-
-%v`,
+			Usage: "使用方法：record 条目 [内容]",
 			SetFlag: func(f *pflag.FlagSet) {
 				f.BoolP("del", "d", false, "删除指定条目")
 			},

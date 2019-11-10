@@ -92,9 +92,7 @@ func init() {
 			Menu:  "ping",
 			Help:  "显示随机洛夫克拉夫特语录",
 			Names: []string{"ping"},
-			Full: `使用方法：ping
-
-%v`,
+			Usage: "使用方法：ping",
 		},
 	})
 }

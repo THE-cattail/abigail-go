@@ -38,9 +38,7 @@ func init() {
 			Menu:  "name",
 			Help:  "随机生成角色姓名",
 			Names: []string{"name"},
-			Full: `使用方法：name [选项]
-
-%v`,
+			Usage: "使用方法：name [选项]",
 			SetFlag: func(f *pflag.FlagSet) {
 				f.String("lang", "cn", "指定生成姓名的语言（cn、en 或 jp）")
 			},

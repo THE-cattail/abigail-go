@@ -22,7 +22,7 @@ var (
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			cancel, _ := bm.Flags["call"].GetBool("cancel")
+			cancel, _ := u.Message.Flags["call"].GetBool("cancel")
 			if cancel {
 				if callMap[u.Chat.ID] != nil && callMap[u.Chat.ID].Sponsor.ID == u.User.ID {
 					callMap[u.Chat.ID] = nil
@@ -107,9 +107,7 @@ func init() {
 			Menu:  "call",
 			Help:  "点名功能",
 			Names: []string{"call"},
-			Full: `使用方法：call @用户...
-
-%v`,
+			Usage: "使用方法：call @用户...",
 			SetFlag: func(f *pflag.FlagSet) {
 				f.BoolP("cancel", "c", false, "取消当前点名")
 				f.BoolP("status", "s", false, "查看当前点名情况")

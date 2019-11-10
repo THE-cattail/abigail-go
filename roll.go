@@ -29,9 +29,7 @@ func init() {
 			Menu:  "mad",
 			Help:  "随机生成疯狂症状",
 			Names: []string{"mad"},
-			Full: `使用方法：mad [选项]，默认生成即时症状
-
-%v`,
+			Usage: "使用方法：mad [选项]，默认生成即时症状",
 			SetFlag: func(f *pflag.FlagSet) {
 				f.BoolP("sum", "s", false, "生成总结症状")
 			},
@@ -99,9 +97,7 @@ func init() {
 			Menu:  "char",
 			Help:  "生成随机人物卡",
 			Names: []string{"char"},
-			Full: `使用方法：char [选项]，默认仅生成属性
-
-%v`,
+			Usage: "使用方法：char [选项]，默认仅生成属性",
 			SetFlag: func(f *pflag.FlagSet) {
 				f.BoolP("full", "f", false, "生成完整角色背景")
 				f.Int("num", 1, "生成角色卡数量（仅简略生成时可用）")
@@ -242,9 +238,7 @@ func init() {
 			Menu:  "roll",
 			Help:  "roll 点功能",
 			Names: []string{"roll", "r"},
-			Full: `使用方法：roll（或 r） [选项] [说明文字] [数值/表达式/列表]，默认返回 1d100 的结果
-
-%v`,
+			Usage: "使用方法：roll（或 r） [选项] [说明文字] [数值/表达式/列表]，默认返回 1d100 的结果",
 			SetFlag: func(f *pflag.FlagSet) {
 				f.BoolP("hide", "h", false, "暗骰")
 				f.String("diff", "n", "设置检定的困难程度（普通=n，困难=h，极难=e")

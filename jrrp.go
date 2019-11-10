@@ -287,9 +287,7 @@ func init() {
 			Menu:  "jrrp",
 			Help:  "今日人品功能",
 			Names: []string{"jrrp"},
-			Full: `使用方法：jrrp
-
-%v`,
+			Usage: "使用方法：jrrp",
 		},
 	})
 }

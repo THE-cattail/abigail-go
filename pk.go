@@ -33,9 +33,7 @@ func init() {
 			Menu:  "pk",
 			Help:  "对抗检定功能",
 			Names: []string{"pk"},
-			Full: `使用方法：pk
-
-%v`,
+			Usage: "使用方法：pk",
 		},
 	})
 }
