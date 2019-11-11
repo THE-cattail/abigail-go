@@ -12,14 +12,14 @@ import (
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			time := time.Now().Format("20060102")
+			time := time.Now().In(loc).Format("20060102")
 			if time != bm.Redis.HGet("jrrp", "time").Val() {
 				bm.Redis.Del("jrrp")
 			}
 			bm.Redis.HSet("jrrp", "time", time)
 
 			if bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val() != "" {
-				bm.Reply(u, u.User.NickName+bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val())
+				bm.Reply(u, bm.At(u.User)+bm.Redis.HGet("jrrp", fmt.Sprintf("%v_%v", u.Bot.ID, u.User.ID)).Val())
 				return true
 			}
 

@@ -76,6 +76,8 @@ func init() {
 		},
 	})
 
+	bm.SubEntries = append(bm.SubEntries, "log")
+
 	bm.AddCommand(&botmaid.Command{
 		Do: bm.SubscribeCommandDo,
 		Help: &botmaid.Help{

@@ -49,4 +49,8 @@ func init() {
 	bm.Words["upgraded"] = "版本更新！"
 	bm.Words["subscribed"] = "已订阅“%v”"
 	bm.Words["unsubscribed"] = "已取消订阅“%v”"
+	bm.Words["correctSubEntries"] = "这些条目可以被订阅：%v"
+	bm.Words["subEntriesFormat"] = "“%v”"
+	bm.Words["subEntriesSeparator"] = "、"
+	bm.Words["subEntriesAnd"] = "和"
 }

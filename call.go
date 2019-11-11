@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/catsworld/botmaid"
 	"github.com/spf13/pflag"
@@ -88,8 +87,8 @@ func init() {
 				for i := 1; i < len(f.Args()); i++ {
 					id, err := (*u.Bot.API).ParseUserID(u, f.Args()[i])
 					if err != nil {
-						log.Println(err)
 						bm.Reply(u, fmt.Sprintf(bm.Words["invalidUser"], bm.At(u.User), f.Args()[i]))
+						callMap[u.Chat.ID] = nil
 						return true
 					}
 
