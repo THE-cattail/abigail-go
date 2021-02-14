@@ -45,6 +45,7 @@ func init() {
 			}
 			if num > 5 {
 				bm.Reply(u, "同时生成的角色卡数量至多为 5。")
+				num = 5
 			}
 
 			c := &coc.Character{}

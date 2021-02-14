@@ -14,7 +14,11 @@ import (
 func init() {
 	bm.AddCommand(&botmaid.Command{
 		Do: func(u *botmaid.Update, f *pflag.FlagSet) bool {
-			lang, _ := f.GetString("lang")
+			// lang, _ := f.GetString("lang")
+			lang := "cn"
+			if len(u.Message.Args) == 2 {
+				lang = u.Message.Args[1]
+			}
 
 			if lang == "cn" {
 				bm.Reply(u, rand.GetRand().ChineseName())
