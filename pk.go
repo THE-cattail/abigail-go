@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/the-cattail/abigail-gococ"
+	"github.com/the-cattail/abigail-go/coc"
 	"github.com/the-cattail/botmaid"
 	"github.com/spf13/pflag"
 )

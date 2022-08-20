@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/the-cattail/abigail-gococ"
-	"github.com/the-cattail/abigail-gococmath"
+	"github.com/the-cattail/abigail-go/coc"
+	"github.com/the-cattail/abigail-go/cocmath"
 	"github.com/the-cattail/botmaid"
 	"github.com/the-cattail/botmaid/random"
 	"github.com/spf13/pflag"
