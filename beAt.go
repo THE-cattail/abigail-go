@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/catsworld/botmaid"
-	"github.com/catsworld/botmaid/random"
+	"github.com/the-cattail/botmaid"
+	"github.com/the-cattail/botmaid/random"
 	"github.com/spf13/pflag"
 )
 

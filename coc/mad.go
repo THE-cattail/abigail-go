@@ -3,7 +3,7 @@ package coc
 import (
 	"fmt"
 
-	"github.com/catsworld/botmaid/random"
+	"github.com/the-cattail/botmaid/random"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/catsworld/botmaid/random"
+	"github.com/the-cattail/botmaid/random"
 )
 
 // Result includes the minimize, maximum and exact result of an expression.

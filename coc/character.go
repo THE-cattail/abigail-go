@@ -2,8 +2,8 @@ package coc
 
 import (
 	"github.com/Pallinder/go-randomdata"
-	"github.com/catsworld/abigail/cocmath"
-	"github.com/catsworld/botmaid/random"
+	"github.com/the-cattail/abigail/cocmath"
+	"github.com/the-cattail/botmaid/random"
 	"github.com/goroom/rand"
 	"github.com/mattn/go-gimei"
 )

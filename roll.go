@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/catsworld/abigail/coc"
-	"github.com/catsworld/abigail/cocmath"
-	"github.com/catsworld/botmaid"
-	"github.com/catsworld/botmaid/random"
+	"github.com/the-cattail/abigail/coc"
+	"github.com/the-cattail/abigail/cocmath"
+	"github.com/the-cattail/botmaid"
+	"github.com/the-cattail/botmaid/random"
 	"github.com/spf13/pflag"
 )
 

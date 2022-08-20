@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/catsworld/botmaid"
+	"github.com/the-cattail/botmaid"
 	"github.com/spf13/pflag"
 )
 

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/catsworld/botmaid"
+	"github.com/the-cattail/botmaid"
 	"github.com/spf13/pflag"
 
 	_ "github.com/lib/pq"

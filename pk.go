@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/catsworld/abigail/coc"
-	"github.com/catsworld/botmaid"
+	"github.com/the-cattail/abigail/coc"
+	"github.com/the-cattail/botmaid"
 	"github.com/spf13/pflag"
 )
 
